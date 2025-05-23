@@ -26,7 +26,7 @@ def save_subscriber(user_id):
         print(f"[LOG] Добавлен новый подписчик: {user_id}")
 
 async def update_subscribers():
-    print("[LOG] Обновление подписчиков (имитация)")
+    print("[LOG] Обновление подписчиков: ")
 
 def get_yesterday_range():
     today = datetime.now(timezone.utc).date()
@@ -65,7 +65,7 @@ def summarize_news(news_list):
             {"role": "system", "content": "Сделай краткую сводку новостей за сутки по этим выдержкам, обязательно указывай источники."},
             {"role": "user", "content": text}
         ],
-        max_tokens=1000,
+        max_tokens=4096,
         temperature=0.7
     )
     return response.choices[0].message.content
