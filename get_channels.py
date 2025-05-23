@@ -1,27 +1,44 @@
-# get_channels.py
-
-from telethon.sync import TelegramClient
 from telethon.tl.functions.messages import GetDialogFiltersRequest
-from config import api_id, api_hash, FOLDER_NAME
+from telethon import TelegramClient
+from config import api_id, api_hash
 
-def get_channel_usernames_from_folder(folder_name=FOLDER_NAME):
-    with TelegramClient('anon', api_id, api_hash) as temp_client:
-        filters = temp_client(GetDialogFiltersRequest())
-        target_filter = None
-        for f in filters.filters:
-            if hasattr(f, 'title') and f.title.text == folder_name:
-                target_filter = f
+async def get_channel_usernames_from_folder(folder_name):
+    async with TelegramClient('anon', api_id, api_hash) as temp_client:
+        filters_resp = await temp_client(GetDialogFiltersRequest())
+        # autodetect field with filters list
+        filters = None
+        for attr in ['results', 'filters', 'dialog_filters']:
+            if hasattr(filters_resp, attr):
+                filters = getattr(filters_resp, attr)
                 break
-        if not target_filter:
-            print(f"Папка '{folder_name}' не найдена.")
-            return []
-        usernames = []
-        for peer in target_filter.include_peers:
-            entity = temp_client.get_entity(peer)
-            if hasattr(entity, 'username') and entity.username:
-                usernames.append(entity.username)
-        return usernames
+        if filters is None:
+            raise Exception(f"Не найдено ни одно поле с фильтрами в {dir(filters_resp)}")
+        
+        found = False
+        channel_usernames = []
+        for f in filters:
+            # Для Telethon 1.40 f.title иногда TextWithEntities!
+            title = ""
+            if hasattr(f, "title"):
+                if hasattr(f.title, "text"):
+                    title = f.title.text
+                else:
+                    title = f.title
+            elif hasattr(f, "text") and hasattr(f.text, "text"):
+                title = f.text.text
 
-# Для ручного теста:
-if __name__ == "__main__":
-    print(get_channel_usernames_from_folder())
+            if title == folder_name:
+                found = True
+                if hasattr(f, 'include_peers') and f.include_peers:
+                    for peer in f.include_peers:
+                        try:
+                            entity = await temp_client.get_entity(peer)
+                            if hasattr(entity, 'username') and entity.username:
+                                channel_usernames.append(entity.username)
+                        except Exception as e:
+                            print(f"[WARN] Не смог получить username для peer {peer}: {e}")
+                break
+
+        if not found:
+            print(f"[WARN] Папка '{folder_name}' не найдена")
+        return channel_usernames

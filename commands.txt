@@ -1,0 +1,5 @@
+nano mycron.txt - редактирование крона
+crontab -r
+crontab -l
+
+

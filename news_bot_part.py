@@ -1,12 +1,12 @@
+# news_bot_part.py
+
 from telethon.sync import TelegramClient
 from telegram import Bot
 import openai
-from config import api_id, api_hash, telegram_bot_token, openai_api_key, FOLDER_NAME
+from config import api_id, api_hash, telegram_bot_token, openai_api_key, FOLDER_NAME, SUBSCRIBERS_FILE
 from get_channels import get_channel_usernames_from_folder
 import asyncio
 from datetime import datetime, timedelta, timezone
-
-SUBSCRIBERS_FILE = 'subscribers.txt'
 
 def load_subscribers():
     try:
@@ -16,36 +16,40 @@ def load_subscribers():
         print("[WARN] Файл с подписчиками не найден, список пуст")
         return []
 
+def save_subscriber(user_id):
+    subscribers = set(load_subscribers())
+    if user_id not in subscribers:
+        subscribers.add(user_id)
+        with open(SUBSCRIBERS_FILE, 'w') as f:
+            for sub in subscribers:
+                f.write(f"{sub}\n")
+        print(f"[LOG] Добавлен новый подписчик: {user_id}")
+
+async def update_subscribers():
+    print("[LOG] Обновление подписчиков (имитация)")
+
 def get_yesterday_range():
     today = datetime.now(timezone.utc).date()
     start = datetime.combine(today - timedelta(days=1), datetime.min.time(), tzinfo=timezone.utc)
     end = datetime.combine(today, datetime.min.time(), tzinfo=timezone.utc)
     return start, end
 
-channel_usernames = get_channel_usernames_from_folder(FOLDER_NAME)
-print("Каналы для агрегации:", channel_usernames)
-
 client = TelegramClient('anon_news', api_id, api_hash)
 bot = Bot(token=telegram_bot_token)
 client_ai = openai.OpenAI(api_key=openai_api_key)
 
-async def get_news():
+async def get_news(channel_usernames):
     all_news = []
     start, end = get_yesterday_range()
     print(f"[DEBUG] Диапазон фильтра: {start} ... {end}")
     for channel in channel_usernames:
-        async for message in client.iter_messages(channel):  # reverse=False по умолчанию — от новых к старым
+        async for message in client.iter_messages(channel):
             msg_date = message.date
-
-            # Нормализуем дату к UTC (если нужно) и убираем микросекунды
             if msg_date.tzinfo is None:
                 msg_date = msg_date.replace(tzinfo=timezone.utc)
             msg_date_norm = msg_date.replace(microsecond=0)
 
-            print(f"[TRACE] {channel} | id={message.id} | дата={msg_date_norm} | тип: {type(msg_date_norm)}")
-
             if msg_date_norm < start:
-                # Дошли до старых сообщений — выходим из перебора для этого канала
                 break
             if start <= msg_date_norm < end:
                 if message.text:
@@ -78,19 +82,26 @@ async def send_news(summary):
         try:
             result = await bot.send_message(chat_id=user_id, text=summary)
             print(f"[LOG] Сообщение успешно отправлено пользователю {user_id}, message_id={result.message_id}")
-            active_subscribers.append(user_id)  # Сохраняем, если всё ок
+            active_subscribers.append(user_id)
         except Exception as e:
             print(f"[ERROR] Не удалось отправить сообщение пользователю {user_id}: {e}")
-            # Тут можно проверить конкретный тип ошибки, например telegram.error.BotBlocked
 
-    # Обновляем файл только с активными подписчиками
     with open(SUBSCRIBERS_FILE, 'w') as f:
         for user_id in active_subscribers:
             f.write(f"{user_id}\n")
 
 async def main():
     await client.start()
-    news = await get_news()
+
+    # 1) Обновляем подписчиков
+    await update_subscribers()
+
+    # 2) Обновляем список каналов из папки
+    channel_usernames = await get_channel_usernames_from_folder(FOLDER_NAME)
+    print(f"[LOG] Обновлён список каналов: {channel_usernames}")
+
+    # 3) Собираем новости и рассылаем
+    news = await get_news(channel_usernames)
     print(f"[LOG] Количество найденных новостей за вчера: {len(news)}")
     if not news:
         print("[LOG] Нет новостей за вчера. Прерываю рассылку.")
