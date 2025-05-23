@@ -1,6 +1,0 @@
-# Запуск бота каждое утро в 9:00
-0 9 * * * cd /Users/tzimit/Yandex.Disk.localized/clean_news_bot && /Users/tzimit/Yandex.Disk.localized/clean_news_bot/venv/bin/python news_bot_part.py >> bot.log 2>&1
-
-# (для теста каждую минуту)
-# * * * * * cd /Users/tzimit/Yandex.Disk.localized/clean_news_bot && /Users/tzimit/Yandex.Disk.localized/clean_news_bot/venv/bin/python news_bot_part.py >> bot.log 2>&1
-
