@@ -1,0 +1,4 @@
+# * * * * * cd /Users/tzimit/Yandex.Disk.localized/clean_news_bot && /Users/tzimit/Yandex.Disk.localized/clean_news_bot/venv/bin/python news_bot_part.py >> bot.log 2>&1
+
+0 9 * * * cd /Users/tzimit/Yandex.Disk.localized/clean_news_bot && /Users/tzimit/Yandex.Disk.localized/clean_news_bot/venv/bin/python news_bot_part.py >> bot.log 2>&1
+
