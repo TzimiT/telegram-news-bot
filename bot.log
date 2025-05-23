@@ -1,0 +1,241 @@
+zsh: command not found: 0
+Please enter your phone (or bot token): Traceback (most recent call last):
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/news_bot_part.py", line 21, in <module>
+    channel_usernames = get_channel_usernames_from_folder(FOLDER_NAME)
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/get_channels.py", line 8, in get_channel_usernames_from_folder
+    with TelegramClient('anon', api_id, api_hash) as temp_client:
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/helpers.py", line 219, in _sync_enter
+    return loop.run_until_complete(self.__aenter__())
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/base_events.py", line 642, in run_until_complete
+    return future.result()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 669, in __aenter__
+    return await self.start()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 167, in _start
+    value = phone()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 22, in <lambda>
+    phone: typing.Union[typing.Callable[[], str], str] = lambda: input('Please enter your phone (or bot token): '),
+EOFError: EOF when reading a line
+Please enter your phone (or bot token): Traceback (most recent call last):
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/news_bot_part.py", line 21, in <module>
+    channel_usernames = get_channel_usernames_from_folder(FOLDER_NAME)
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/get_channels.py", line 8, in get_channel_usernames_from_folder
+    with TelegramClient('anon', api_id, api_hash) as temp_client:
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/helpers.py", line 219, in _sync_enter
+    return loop.run_until_complete(self.__aenter__())
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/base_events.py", line 642, in run_until_complete
+    return future.result()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 669, in __aenter__
+    return await self.start()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 167, in _start
+    value = phone()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 22, in <lambda>
+    phone: typing.Union[typing.Callable[[], str], str] = lambda: input('Please enter your phone (or bot token): '),
+EOFError: EOF when reading a line
+Please enter your phone (or bot token): Traceback (most recent call last):
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/news_bot_part.py", line 21, in <module>
+    channel_usernames = get_channel_usernames_from_folder(FOLDER_NAME)
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/get_channels.py", line 8, in get_channel_usernames_from_folder
+    with TelegramClient('anon', api_id, api_hash) as temp_client:
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/helpers.py", line 219, in _sync_enter
+    return loop.run_until_complete(self.__aenter__())
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/base_events.py", line 642, in run_until_complete
+    return future.result()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 669, in __aenter__
+    return await self.start()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 167, in _start
+    value = phone()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 22, in <lambda>
+    phone: typing.Union[typing.Callable[[], str], str] = lambda: input('Please enter your phone (or bot token): '),
+EOFError: EOF when reading a line
+Please enter your phone (or bot token): Traceback (most recent call last):
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/news_bot_part.py", line 21, in <module>
+    channel_usernames = get_channel_usernames_from_folder(FOLDER_NAME)
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/get_channels.py", line 8, in get_channel_usernames_from_folder
+    with TelegramClient('anon', api_id, api_hash) as temp_client:
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/helpers.py", line 219, in _sync_enter
+    return loop.run_until_complete(self.__aenter__())
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/base_events.py", line 642, in run_until_complete
+    return future.result()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 669, in __aenter__
+    return await self.start()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 167, in _start
+    value = phone()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 22, in <lambda>
+    phone: typing.Union[typing.Callable[[], str], str] = lambda: input('Please enter your phone (or bot token): '),
+EOFError: EOF when reading a line
+Please enter your phone (or bot token): Traceback (most recent call last):
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/news_bot_part.py", line 21, in <module>
+    channel_usernames = get_channel_usernames_from_folder(FOLDER_NAME)
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/get_channels.py", line 8, in get_channel_usernames_from_folder
+    with TelegramClient('anon', api_id, api_hash) as temp_client:
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/helpers.py", line 219, in _sync_enter
+    return loop.run_until_complete(self.__aenter__())
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/base_events.py", line 642, in run_until_complete
+    return future.result()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 669, in __aenter__
+    return await self.start()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 167, in _start
+    value = phone()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 22, in <lambda>
+    phone: typing.Union[typing.Callable[[], str], str] = lambda: input('Please enter your phone (or bot token): '),
+EOFError: EOF when reading a line
+Please enter your phone (or bot token): Traceback (most recent call last):
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/news_bot_part.py", line 21, in <module>
+    channel_usernames = get_channel_usernames_from_folder(FOLDER_NAME)
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/get_channels.py", line 8, in get_channel_usernames_from_folder
+    with TelegramClient('anon', api_id, api_hash) as temp_client:
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/helpers.py", line 219, in _sync_enter
+    return loop.run_until_complete(self.__aenter__())
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/base_events.py", line 642, in run_until_complete
+    return future.result()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 669, in __aenter__
+    return await self.start()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 167, in _start
+    value = phone()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 22, in <lambda>
+    phone: typing.Union[typing.Callable[[], str], str] = lambda: input('Please enter your phone (or bot token): '),
+EOFError: EOF when reading a line
+Please enter your phone (or bot token): Traceback (most recent call last):
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/news_bot_part.py", line 21, in <module>
+    channel_usernames = get_channel_usernames_from_folder(FOLDER_NAME)
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/get_channels.py", line 8, in get_channel_usernames_from_folder
+    with TelegramClient('anon', api_id, api_hash) as temp_client:
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/helpers.py", line 219, in _sync_enter
+    return loop.run_until_complete(self.__aenter__())
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/base_events.py", line 642, in run_until_complete
+    return future.result()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 669, in __aenter__
+    return await self.start()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 167, in _start
+    value = phone()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 22, in <lambda>
+    phone: typing.Union[typing.Callable[[], str], str] = lambda: input('Please enter your phone (or bot token): '),
+EOFError: EOF when reading a line
+Please enter your phone (or bot token): Traceback (most recent call last):
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/news_bot_part.py", line 21, in <module>
+    channel_usernames = get_channel_usernames_from_folder(FOLDER_NAME)
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/get_channels.py", line 8, in get_channel_usernames_from_folder
+    with TelegramClient('anon', api_id, api_hash) as temp_client:
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/helpers.py", line 219, in _sync_enter
+    return loop.run_until_complete(self.__aenter__())
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/base_events.py", line 642, in run_until_complete
+    return future.result()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 669, in __aenter__
+    return await self.start()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 167, in _start
+    value = phone()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 22, in <lambda>
+    phone: typing.Union[typing.Callable[[], str], str] = lambda: input('Please enter your phone (or bot token): '),
+EOFError: EOF when reading a line
+Please enter your phone (or bot token): Traceback (most recent call last):
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/news_bot_part.py", line 21, in <module>
+    channel_usernames = get_channel_usernames_from_folder(FOLDER_NAME)
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/get_channels.py", line 8, in get_channel_usernames_from_folder
+    with TelegramClient('anon', api_id, api_hash) as temp_client:
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/helpers.py", line 219, in _sync_enter
+    return loop.run_until_complete(self.__aenter__())
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/base_events.py", line 642, in run_until_complete
+    return future.result()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 669, in __aenter__
+    return await self.start()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 167, in _start
+    value = phone()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 22, in <lambda>
+    phone: typing.Union[typing.Callable[[], str], str] = lambda: input('Please enter your phone (or bot token): '),
+EOFError: EOF when reading a line
+Please enter your phone (or bot token): Traceback (most recent call last):
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/news_bot_part.py", line 21, in <module>
+    channel_usernames = get_channel_usernames_from_folder(FOLDER_NAME)
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/get_channels.py", line 8, in get_channel_usernames_from_folder
+    with TelegramClient('anon', api_id, api_hash) as temp_client:
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/helpers.py", line 219, in _sync_enter
+    return loop.run_until_complete(self.__aenter__())
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/base_events.py", line 642, in run_until_complete
+    return future.result()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 669, in __aenter__
+    return await self.start()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 167, in _start
+    value = phone()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 22, in <lambda>
+    phone: typing.Union[typing.Callable[[], str], str] = lambda: input('Please enter your phone (or bot token): '),
+EOFError: EOF when reading a line
+Please enter your phone (or bot token): Traceback (most recent call last):
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/news_bot_part.py", line 21, in <module>
+    channel_usernames = get_channel_usernames_from_folder(FOLDER_NAME)
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/get_channels.py", line 8, in get_channel_usernames_from_folder
+    with TelegramClient('anon', api_id, api_hash) as temp_client:
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/helpers.py", line 219, in _sync_enter
+    return loop.run_until_complete(self.__aenter__())
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/base_events.py", line 642, in run_until_complete
+    return future.result()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 669, in __aenter__
+    return await self.start()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 167, in _start
+    value = phone()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 22, in <lambda>
+    phone: typing.Union[typing.Callable[[], str], str] = lambda: input('Please enter your phone (or bot token): '),
+EOFError: EOF when reading a line
+Please enter your phone (or bot token): Traceback (most recent call last):
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/news_bot_part.py", line 21, in <module>
+    channel_usernames = get_channel_usernames_from_folder(FOLDER_NAME)
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/get_channels.py", line 8, in get_channel_usernames_from_folder
+    with TelegramClient('anon', api_id, api_hash) as temp_client:
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/helpers.py", line 219, in _sync_enter
+    return loop.run_until_complete(self.__aenter__())
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/base_events.py", line 642, in run_until_complete
+    return future.result()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 669, in __aenter__
+    return await self.start()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 167, in _start
+    value = phone()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 22, in <lambda>
+    phone: typing.Union[typing.Callable[[], str], str] = lambda: input('Please enter your phone (or bot token): '),
+EOFError: EOF when reading a line
+Please enter your phone (or bot token): Traceback (most recent call last):
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/news_bot_part.py", line 21, in <module>
+    channel_usernames = get_channel_usernames_from_folder(FOLDER_NAME)
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/get_channels.py", line 8, in get_channel_usernames_from_folder
+    with TelegramClient('anon', api_id, api_hash) as temp_client:
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/helpers.py", line 219, in _sync_enter
+    return loop.run_until_complete(self.__aenter__())
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/base_events.py", line 642, in run_until_complete
+    return future.result()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 669, in __aenter__
+    return await self.start()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 167, in _start
+    value = phone()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 22, in <lambda>
+    phone: typing.Union[typing.Callable[[], str], str] = lambda: input('Please enter your phone (or bot token): '),
+EOFError: EOF when reading a line
+Please enter your phone (or bot token): Traceback (most recent call last):
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/news_bot_part.py", line 21, in <module>
+    channel_usernames = get_channel_usernames_from_folder(FOLDER_NAME)
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/get_channels.py", line 8, in get_channel_usernames_from_folder
+    with TelegramClient('anon', api_id, api_hash) as temp_client:
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/helpers.py", line 219, in _sync_enter
+    return loop.run_until_complete(self.__aenter__())
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/base_events.py", line 642, in run_until_complete
+    return future.result()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 669, in __aenter__
+    return await self.start()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 167, in _start
+    value = phone()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 22, in <lambda>
+    phone: typing.Union[typing.Callable[[], str], str] = lambda: input('Please enter your phone (or bot token): '),
+EOFError: EOF when reading a line
+Please enter your phone (or bot token): Traceback (most recent call last):
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/news_bot_part.py", line 21, in <module>
+    channel_usernames = get_channel_usernames_from_folder(FOLDER_NAME)
+  File "/Users/tzimit/Yandex.Disk.localized/clean_news_bot/get_channels.py", line 8, in get_channel_usernames_from_folder
+    with TelegramClient('anon', api_id, api_hash) as temp_client:
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/helpers.py", line 219, in _sync_enter
+    return loop.run_until_complete(self.__aenter__())
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/base_events.py", line 642, in run_until_complete
+    return future.result()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 669, in __aenter__
+    return await self.start()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 167, in _start
+    value = phone()
+  File "/Users/tzimit/Library/Python/3.9/lib/python/site-packages/telethon/client/auth.py", line 22, in <lambda>
+    phone: typing.Union[typing.Callable[[], str], str] = lambda: input('Please enter your phone (or bot token): '),
+EOFError: EOF when reading a line
