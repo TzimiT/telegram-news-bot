@@ -62,7 +62,7 @@ def summarize_news(news_list):
     response = client_ai.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "Сделай краткую сводку новостей за сутки по этим выдержкам, обязательно указывай источники."},
+            {"role": "system", "content": "Сделай краткую сводку новостей за сутки по этим выдержкам, в виде япоского хоку обязательно указывай источники."},
             {"role": "user", "content": text}
         ],
         max_tokens=4096,

@@ -1,6 +1,7 @@
 # Секреты/конфиги (оставь ТОЛЬКО локально!)
 config.py
 commands.txt
+subscribers.txt
 
 # Python cache
 __pycache__/

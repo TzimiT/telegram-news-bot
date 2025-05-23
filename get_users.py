@@ -4,11 +4,12 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, fil
 
 SUBSCRIBERS_FILE = 'subscribers.txt'
 
+# Лог только для новых пользователей
 logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    filename='users.log',
+    format='%(asctime)s - %(message)s',
     level=logging.INFO
 )
-
 logger = logging.getLogger(__name__)
 
 def load_subscribers():
@@ -23,7 +24,8 @@ def save_subscriber(user_id):
     if str(user_id) not in subscribers:
         with open(SUBSCRIBERS_FILE, 'a') as f:
             f.write(f"{user_id}\n")
-        logger.info(f"Added new subscriber: {user_id}")
+        logger.info(f"Добавлен новый пользователь: {user_id}")
+    # Не пишем ничего в лог, если пользователь уже был!
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
