@@ -103,7 +103,7 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python check_folders.py"
+args = "echo \"Файл check_folders.py был удален - этот workflow больше не нужен\""
 
 [deployment]
 build = ["sh", "-c", "python news_bot_part.py"]
