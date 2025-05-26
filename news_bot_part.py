@@ -45,21 +45,23 @@ def migrate_old_subscribers():
             with open(OLD_SUBSCRIBERS_FILE, 'r', encoding='utf-8') as f:
                 old_ids = [line.strip() for line in f.readlines()]
 
-                for user_id in old_ids:
-                    try:
-                        user_id = int(user_id)
-                        new_subscribers.append({
-                            "user_id": user_id,
-                            "subscribed_at": datetime.now(timezone.utc).strftime(
-time("%Y-%m-%d %H:%M:%S"),
-                            "migrated": True
-                        })
+            for user_id in old_ids:
+                try:
+                    user_id = int(user_id)
+                    new_subscribers.append({
+                        "user_id": user_id,
+                        "subscribed_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+                        "migrated": True
+                    })
+                except ValueError:
+                    continue
 
-                    with open(SUBSCRIBERS_FILE, 'w', encoding='utf-8') as f:
-                        json.dump({"subscribers": new_subscribers}, f, ensure_ascii=False, indent=2)
+            if new_subscribers:
+                with open(SUBSCRIBERS_FILE, 'w', encoding='utf-8') as f:
+                    json.dump({"subscribers": new_subscribers}, f, ensure_ascii=False, indent=2)
 
-                    logger.info(f"[INFO] Мигрировано {len(new_subscribers)} подписчиков из старого файла")
-                    return new_subscribers
+                logger.info(f"[INFO] Мигрировано {len(new_subscribers)} подписчиков из старого файла")
+            return new_subscribers
         except Exception as e:
             logger.error(f"[ERROR] Ошибка миграции старых подписчиков: {e}")
     return []
