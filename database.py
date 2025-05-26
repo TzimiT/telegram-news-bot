@@ -171,6 +171,8 @@ class PostgresDatabase:
         cursor = conn.cursor()
         
         try:
+            print(f"[DEBUG] add_user: получены параметры - user_id={user_id}, username={username}, user_data={bool(user_data)}")
+            
             # Извлекаем данные из user_data если переданы
             if user_data:
                 language_code = user_data.get('language_code')
@@ -199,6 +201,9 @@ class PostgresDatabase:
             
             # Формируем полное имя
             full_name = f"{first_name or ''} {last_name or ''}".strip()
+            
+            print(f"[DEBUG] add_user: подготовленные данные - full_name='{full_name}', is_active=True")
+            print(f"[DEBUG] add_user: выполняем SQL запрос INSERT/UPDATE...")
             
             cursor.execute('''
                 INSERT INTO users (
