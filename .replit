@@ -23,3 +23,12 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python news_bot_part.py"
+
+[[workflows.workflow]]
+name = "User Collection Bot"
+author = 43151943
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python get_users.py"
