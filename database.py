@@ -207,18 +207,17 @@ class PostgresDatabase:
             
             cursor.execute('''
                 INSERT INTO users (
-                    user_id, username, first_name, last_name, full_name, 
+                    user_id, username, first_name, last_name, 
                     language_code, is_bot, is_premium, added_via_link,
                     can_join_groups, can_read_all_group_messages, supports_inline_queries,
                     is_verified, is_restricted, is_scam, is_fake,
                     added_at, is_active, last_interaction, user_data
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (user_id) DO UPDATE SET
                     username = EXCLUDED.username,
                     first_name = EXCLUDED.first_name,
                     last_name = EXCLUDED.last_name,
-                    full_name = EXCLUDED.full_name,
                     language_code = EXCLUDED.language_code,
                     is_bot = EXCLUDED.is_bot,
                     is_premium = EXCLUDED.is_premium,
@@ -233,7 +232,7 @@ class PostgresDatabase:
                     last_interaction = CURRENT_TIMESTAMP,
                     user_data = EXCLUDED.user_data
             ''', (
-                user_id, username or "-", first_name or "-", last_name or "-", full_name,
+                user_id, username or "-", first_name or "-", last_name or "-",
                 language_code, is_bot, is_premium, added_via_link,
                 can_join_groups, can_read_all_group_messages, supports_inline_queries,
                 is_verified, is_restricted, is_scam, is_fake,
@@ -298,7 +297,7 @@ class PostgresDatabase:
         
         try:
             cursor.execute('''
-                SELECT user_id, username, first_name, last_name, full_name,
+                SELECT user_id, username, first_name, last_name,
                        language_code, is_bot, is_premium, added_via_link,
                        can_join_groups, can_read_all_group_messages, supports_inline_queries,
                        is_verified, is_restricted, is_scam, is_fake,
