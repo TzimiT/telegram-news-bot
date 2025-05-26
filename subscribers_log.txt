@@ -48,3 +48,31 @@
 2025-05-26 17:33:54,802 - WARNING - [INFO] Неактивные подписчики удалены: [94598500, 316725353, 5671784074, 243239381, 452159772, 5266043, 236384028]
 2025-05-26 17:33:54,803 - INFO - Disconnecting from 149.154.167.51:443/TcpFull...
 2025-05-26 17:33:54,804 - INFO - Disconnection from 149.154.167.51:443/TcpFull complete!
+2025-05-26 17:51:44,333 - INFO - [INFO] Найден старый формат подписчиков, мигрирую...
+2025-05-26 17:51:44,334 - INFO - [INFO] Мигрировано 7 подписчиков из старого файла
+2025-05-26 17:51:44,337 - INFO - Connecting to 149.154.167.51:443/TcpFull...
+2025-05-26 17:51:44,455 - INFO - Connection to 149.154.167.51:443/TcpFull complete!
+2025-05-26 17:51:45,311 - INFO - User is already connected!
+2025-05-26 17:52:14,760 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-26 17:52:14,765 - INFO - [INFO] Найден старый формат подписчиков, мигрирую...
+2025-05-26 17:52:14,766 - INFO - [INFO] Мигрировано 7 подписчиков из старого файла
+2025-05-26 17:52:14,766 - INFO - [INFO] Загружено 7 подписчиков
+2025-05-26 17:52:14,787 - INFO - [INFO] Начинаю рассылку для 7 подписчиков
+2025-05-26 17:52:15,296 - INFO - HTTP Request: POST https://api.telegram.org/bot8024499779:AAHSQsXaQAQlaciGEFALAco_hFPW-zR-RT0/sendMessage "HTTP/1.1 401 Unauthorized"
+2025-05-26 17:52:15,297 - ERROR - [FAILED] Не удалось отправить сообщение пользователю 94598500: Unauthorized
+2025-05-26 17:52:15,415 - INFO - HTTP Request: POST https://api.telegram.org/bot8024499779:AAHSQsXaQAQlaciGEFALAco_hFPW-zR-RT0/sendMessage "HTTP/1.1 401 Unauthorized"
+2025-05-26 17:52:15,416 - ERROR - [FAILED] Не удалось отправить сообщение пользователю 316725353: Unauthorized
+2025-05-26 17:52:15,535 - INFO - HTTP Request: POST https://api.telegram.org/bot8024499779:AAHSQsXaQAQlaciGEFALAco_hFPW-zR-RT0/sendMessage "HTTP/1.1 401 Unauthorized"
+2025-05-26 17:52:15,536 - ERROR - [FAILED] Не удалось отправить сообщение пользователю 5671784074: Unauthorized
+2025-05-26 17:52:15,654 - INFO - HTTP Request: POST https://api.telegram.org/bot8024499779:AAHSQsXaQAQlaciGEFALAco_hFPW-zR-RT0/sendMessage "HTTP/1.1 401 Unauthorized"
+2025-05-26 17:52:15,654 - ERROR - [FAILED] Не удалось отправить сообщение пользователю 243239381: Unauthorized
+2025-05-26 17:52:15,772 - INFO - HTTP Request: POST https://api.telegram.org/bot8024499779:AAHSQsXaQAQlaciGEFALAco_hFPW-zR-RT0/sendMessage "HTTP/1.1 401 Unauthorized"
+2025-05-26 17:52:15,773 - ERROR - [FAILED] Не удалось отправить сообщение пользователю 452159772: Unauthorized
+2025-05-26 17:52:15,890 - INFO - HTTP Request: POST https://api.telegram.org/bot8024499779:AAHSQsXaQAQlaciGEFALAco_hFPW-zR-RT0/sendMessage "HTTP/1.1 401 Unauthorized"
+2025-05-26 17:52:15,891 - ERROR - [FAILED] Не удалось отправить сообщение пользователю 5266043: Unauthorized
+2025-05-26 17:52:16,009 - INFO - HTTP Request: POST https://api.telegram.org/bot8024499779:AAHSQsXaQAQlaciGEFALAco_hFPW-zR-RT0/sendMessage "HTTP/1.1 401 Unauthorized"
+2025-05-26 17:52:16,009 - ERROR - [FAILED] Не удалось отправить сообщение пользователю 236384028: Unauthorized
+2025-05-26 17:52:16,010 - INFO - [INFO] Обновлен список подписчиков: активных=0, удалено=7
+2025-05-26 17:52:16,010 - WARNING - [INFO] Неактивные подписчики удалены: [94598500, 316725353, 5671784074, 243239381, 452159772, 5266043, 236384028]
+2025-05-26 17:52:16,011 - INFO - Disconnecting from 149.154.167.51:443/TcpFull...
+2025-05-26 17:52:16,012 - INFO - Disconnection from 149.154.167.51:443/TcpFull complete!
