@@ -50,3 +50,7 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python get_users.py"
+
+[deployment]
+build = ["sh", "-c", "python news_bot_part.py"]
+deploymentTarget = "scheduled"

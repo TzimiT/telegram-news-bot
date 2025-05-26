@@ -150,3 +150,23 @@
 2025-05-26 19:07:15,446 - WARNING - [INFO] Деактивированы неактивные подписчики: [5266043, 236384028, 243239381, 316725353, 452159772, 5671784074]
 2025-05-26 19:07:15,446 - INFO - Disconnecting from 149.154.167.51:443/TcpFull...
 2025-05-26 19:07:15,447 - INFO - Disconnection from 149.154.167.51:443/TcpFull complete!
+2025-05-26 19:08:58,970 - INFO - Connecting to 149.154.167.51:443/TcpFull...
+2025-05-26 19:08:59,087 - INFO - Connection to 149.154.167.51:443/TcpFull complete!
+2025-05-26 19:08:59,969 - INFO - User is already connected!
+2025-05-26 19:09:29,143 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-26 19:09:29,169 - INFO - [INFO] Начинаю рассылку для 1 активных подписчиков
+2025-05-26 19:09:29,779 - INFO - HTTP Request: POST https://api.telegram.org/bot7932039953:AAFq5UHiAOpcWcHuQI9kkl95GYwSPqYrY7A/sendMessage "HTTP/1.1 200 OK"
+2025-05-26 19:09:29,780 - INFO - [SUCCESS] Сообщение отправлено пользователю 94598500, message_id=9
+2025-05-26 19:09:29,837 - INFO - [INFO] Рассылка завершена: успешно=1, неудачно=0
+2025-05-26 19:09:29,839 - INFO - Disconnecting from 149.154.167.51:443/TcpFull...
+2025-05-26 19:09:29,851 - INFO - Disconnection from 149.154.167.51:443/TcpFull complete!
+2025-05-26 19:10:34,607 - INFO - Connecting to 149.154.167.51:443/TcpFull...
+2025-05-26 19:10:34,723 - INFO - Connection to 149.154.167.51:443/TcpFull complete!
+2025-05-26 19:10:35,524 - INFO - User is already connected!
+2025-05-26 19:11:04,768 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-26 19:11:04,785 - INFO - [INFO] Начинаю рассылку для 1 активных подписчиков
+2025-05-26 19:11:05,367 - INFO - HTTP Request: POST https://api.telegram.org/bot7932039953:AAFq5UHiAOpcWcHuQI9kkl95GYwSPqYrY7A/sendMessage "HTTP/1.1 200 OK"
+2025-05-26 19:11:05,368 - INFO - [SUCCESS] Сообщение отправлено пользователю 94598500, message_id=10
+2025-05-26 19:11:05,408 - INFO - [INFO] Рассылка завершена: успешно=1, неудачно=0
+2025-05-26 19:11:05,410 - INFO - Disconnecting from 149.154.167.51:443/TcpFull...
+2025-05-26 19:11:05,420 - INFO - Disconnection from 149.154.167.51:443/TcpFull complete!
