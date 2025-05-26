@@ -76,3 +76,31 @@
 2025-05-26 17:52:16,010 - WARNING - [INFO] Неактивные подписчики удалены: [94598500, 316725353, 5671784074, 243239381, 452159772, 5266043, 236384028]
 2025-05-26 17:52:16,011 - INFO - Disconnecting from 149.154.167.51:443/TcpFull...
 2025-05-26 17:52:16,012 - INFO - Disconnection from 149.154.167.51:443/TcpFull complete!
+2025-05-26 17:56:42,346 - INFO - [INFO] Найден старый формат подписчиков, мигрирую...
+2025-05-26 17:56:42,347 - INFO - [INFO] Мигрировано 7 подписчиков из старого файла
+2025-05-26 17:56:42,350 - INFO - Connecting to 149.154.167.51:443/TcpFull...
+2025-05-26 17:56:42,467 - INFO - Connection to 149.154.167.51:443/TcpFull complete!
+2025-05-26 17:56:43,442 - INFO - User is already connected!
+2025-05-26 17:57:13,726 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-26 17:57:13,733 - INFO - [INFO] Найден старый формат подписчиков, мигрирую...
+2025-05-26 17:57:13,733 - INFO - [INFO] Мигрировано 7 подписчиков из старого файла
+2025-05-26 17:57:13,734 - INFO - [INFO] Загружено 7 подписчиков
+2025-05-26 17:57:13,759 - INFO - [INFO] Начинаю рассылку для 7 подписчиков
+2025-05-26 17:57:14,314 - INFO - HTTP Request: POST https://api.telegram.org/bot7932039953:AAFq5UHiAOpcWcHuQI9kkl95GYwSPqYrY7A/sendMessage "HTTP/1.1 200 OK"
+2025-05-26 17:57:14,316 - INFO - [SUCCESS] Сообщение отправлено пользователю 94598500, message_id=6
+2025-05-26 17:57:14,451 - INFO - HTTP Request: POST https://api.telegram.org/bot7932039953:AAFq5UHiAOpcWcHuQI9kkl95GYwSPqYrY7A/sendMessage "HTTP/1.1 400 Bad Request"
+2025-05-26 17:57:14,452 - ERROR - [FAILED] Не удалось отправить сообщение пользователю 316725353: Chat not found
+2025-05-26 17:57:14,589 - INFO - HTTP Request: POST https://api.telegram.org/bot7932039953:AAFq5UHiAOpcWcHuQI9kkl95GYwSPqYrY7A/sendMessage "HTTP/1.1 400 Bad Request"
+2025-05-26 17:57:14,589 - ERROR - [FAILED] Не удалось отправить сообщение пользователю 5671784074: Chat not found
+2025-05-26 17:57:14,725 - INFO - HTTP Request: POST https://api.telegram.org/bot7932039953:AAFq5UHiAOpcWcHuQI9kkl95GYwSPqYrY7A/sendMessage "HTTP/1.1 400 Bad Request"
+2025-05-26 17:57:14,725 - ERROR - [FAILED] Не удалось отправить сообщение пользователю 243239381: Chat not found
+2025-05-26 17:57:14,877 - INFO - HTTP Request: POST https://api.telegram.org/bot7932039953:AAFq5UHiAOpcWcHuQI9kkl95GYwSPqYrY7A/sendMessage "HTTP/1.1 400 Bad Request"
+2025-05-26 17:57:14,878 - ERROR - [FAILED] Не удалось отправить сообщение пользователю 452159772: Chat not found
+2025-05-26 17:57:15,075 - INFO - HTTP Request: POST https://api.telegram.org/bot7932039953:AAFq5UHiAOpcWcHuQI9kkl95GYwSPqYrY7A/sendMessage "HTTP/1.1 400 Bad Request"
+2025-05-26 17:57:15,075 - ERROR - [FAILED] Не удалось отправить сообщение пользователю 5266043: Chat not found
+2025-05-26 17:57:15,295 - INFO - HTTP Request: POST https://api.telegram.org/bot7932039953:AAFq5UHiAOpcWcHuQI9kkl95GYwSPqYrY7A/sendMessage "HTTP/1.1 400 Bad Request"
+2025-05-26 17:57:15,295 - ERROR - [FAILED] Не удалось отправить сообщение пользователю 236384028: Chat not found
+2025-05-26 17:57:15,296 - INFO - [INFO] Обновлен список подписчиков: активных=1, удалено=6
+2025-05-26 17:57:15,296 - WARNING - [INFO] Неактивные подписчики удалены: [316725353, 5671784074, 243239381, 452159772, 5266043, 236384028]
+2025-05-26 17:57:15,297 - INFO - Disconnecting from 149.154.167.51:443/TcpFull...
+2025-05-26 17:57:15,298 - INFO - Disconnection from 149.154.167.51:443/TcpFull complete!
