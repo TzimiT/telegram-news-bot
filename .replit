@@ -94,59 +94,7 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python -c \""
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "import asyncio"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "from telethon import TelegramClient"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "from config import api_id, api_hash"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "from get_channels import get_channels_fullinfo_from_folder"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = ""
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "async def setup_sport_channels():"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "    SESSION_FILE = 'sessions/news_session'"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "    async with TelegramClient(SESSION_FILE, api_id, api_hash) as client:"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "        await get_channels_fullinfo_from_folder(client, 'Sport', 'sport_channels.json')"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "        print('✅ Спортивные каналы настроены!')"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = ""
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "asyncio.run(setup_sport_channels())"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "\""
+args = "python setup_sport_channels.py"
 
 [[workflows.workflow]]
 name = "Check Telegram Folders"
