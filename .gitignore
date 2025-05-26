@@ -1,34 +1,60 @@
-# Секреты/конфиги (оставь ТОЛЬКО локально!)
-config.py
-commands.txt
-subscribers.txt
-subscribers.json
 
-# Python cache
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Файлы сессии
-*.session
-*.session-journal
-bot_sessions/
+# Telegram session files
+sessions/*.session
+sessions/*.session-journal
 
-# Логи
+# Database files
+*.db
+
+# Config files with sensitive data
+config.py
+
+# Log files
 *.log
-*.log.*
+*.txt
+subscribers_log.txt
 
-# Виртуальные окружения (если используешь)
-venv/
-env/
+# JSON files with user data (keep example files)
+subscribers*.json
+!subscribers_example.json
 
-# Логи, временные файлы
-*.log
-*.sqlite3
+# Temporary files
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
 
-# IDE/редактор файлы (VSCode, PyCharm и т.п.)
+# IDE files
 .vscode/
 .idea/
+*.swp
+*.swo
 
-# dotenv (если когда-нибудь потребуется)
+# Environment variables
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
