@@ -3,7 +3,7 @@ from config import api_id, api_hash
 import asyncio
 import os
 
-SESSION_FILE = 'news_session'
+SESSION_FILE = 'sessions/news_session'
 SESSION_DIR = 'sessions'  # Define a session directory
 
 # Create the session directory if it doesn't exist

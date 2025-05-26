@@ -7,11 +7,9 @@ import asyncio
 
 CHANNELS_FILE = "channels.json"
 # Используем ту же изолированную сессию что и в session_manager
-SESSION_DIR = 'bot_sessions'  
-SESSION_FILE = os.path.join(SESSION_DIR, 'news_aggregator_session')
+SESSION_FILE = 'sessions/news_session'
 
-# Создаем папку если её нет
-os.makedirs(SESSION_DIR, exist_ok=True)
+# Папка sessions уже создается в session_manager.py
 
 async def main():
     """Основная функция для получения каналов"""

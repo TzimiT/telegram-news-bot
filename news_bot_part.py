@@ -158,7 +158,7 @@ async def send_news(summary):
     except Exception as e:
         logger.error(f"[ERROR] Ошибка обновления активных подписчиков: {e}")
 
-SESSION_FILE = 'news_session'
+SESSION_FILE = 'sessions/news_session'
 
 async def main():
     # Проверяем и мигрируем старых подписчиков перед началом работы
