@@ -4,7 +4,7 @@ modules = ["python-3.12"]
 channel = "stable-24_05"
 
 [workflows]
-runButton = "Setup Session"
+runButton = "News Aggregator"
 
 [[workflows.workflow]]
 name = "Start Bot"
