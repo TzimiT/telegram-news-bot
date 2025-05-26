@@ -214,7 +214,8 @@ async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     user_info = db.get_user_info(user.id)
 
-    if user_info and user_info['is_active']:
+    # Более строгая проверка: пользователь должен существовать И быть активным
+    if user_info and user_info.get('is_active', False) is True:
         stats = db.get_user_stats()
         
         # Формируем расширенную информацию о пользователе
@@ -236,10 +237,18 @@ async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         await update.message.reply_text(message)
     else:
-        await update.message.reply_text(
-            "❌ **Статус подписки:** Ты НЕ подписан на рассылку агрегации новостей про AI\n\n"
-            "Напиши /start чтобы подписаться!"
-        )
+        # Проверяем, был ли пользователь когда-то подписан
+        if user_info and user_info.get('is_active', False) is False:
+            await update.message.reply_text(
+                "❌ **Статус подписки:** Ты отписан от рассылки агрегации новостей про AI\n\n"
+                "📅 Дата отписки: Недавно\n\n"
+                "Напиши /start чтобы подписаться снова!"
+            )
+        else:
+            await update.message.reply_text(
+                "❌ **Статус подписки:** Ты НЕ подписан на рассылку агрегации новостей про AI\n\n"
+                "Напиши /start чтобы подписаться!"
+            )
 
 # --- /admin_stats: статистика для админов ---
 async def admin_stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
