@@ -138,10 +138,16 @@ async def main():
             print("❌ Сессия не авторизована! Запустите workflow 'Setup Session' для повторной авторизации.")
             return
         # Шаг 1: Получить и сохранить полную инфу о каналах из папки
+        print(f"[LOG] Проверяю обновления каналов в папке '{FOLDER_NAME}'...")
         await get_channels_fullinfo_from_folder(client, FOLDER_NAME)
+        
         # Шаг 2: Загрузить полную инфу о каналах для рассылки
         channels = load_channels_from_json()
-        print(f"[LOG] Каналы для агрегации: {[ch.get('username','?') for ch in channels]}")
+        print(f"[LOG] Каналы для агрегации ({len(channels)} шт.): {[ch.get('username','?') for ch in channels]}")
+        
+        if not channels:
+            print(f"[ERROR] Не найдено каналов в папке '{FOLDER_NAME}'. Проверьте настройки папки в Telegram.")
+            return
 
         # Шаг 3: Собрать новости
         news = await get_news(client, channels)

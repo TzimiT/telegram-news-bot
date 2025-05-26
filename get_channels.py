@@ -90,8 +90,35 @@ async def get_channels_fullinfo_from_folder(client, folder_name):
                         print(f"[WARN] Не смог получить инфу для peer {peer}: {e}")
             break
 
+    # Читаем старый список каналов для сравнения
+    old_channels = []
+    if os.path.exists(CHANNELS_FILE):
+        try:
+            with open(CHANNELS_FILE, "r", encoding="utf-8") as f:
+                old_data = json.load(f)
+                old_channels = old_data.get("channels", [])
+        except:
+            pass
+    
+    # Сохраняем новый список
     with open(CHANNELS_FILE, "w", encoding="utf-8") as f:
         json.dump({"channels": result_channels}, f, ensure_ascii=False, indent=2)
+
+    # Анализируем изменения
+    old_usernames = {ch.get('username') for ch in old_channels if ch.get('username')}
+    new_usernames = {ch.get('username') for ch in result_channels if ch.get('username')}
+    
+    added = new_usernames - old_usernames
+    removed = old_usernames - new_usernames
+    
+    if added:
+        print(f"[LOG] ✅ Добавлены новые каналы: {list(added)}")
+    if removed:
+        print(f"[LOG] ❌ Удалены каналы: {list(removed)}")
+    if not added and not removed and old_channels:
+        print(f"[LOG] 📋 Список каналов не изменился ({len(result_channels)} шт.)")
+    elif not old_channels:
+        print(f"[LOG] 🆕 Создан новый список каналов ({len(result_channels)} шт.)")
 
     if not result_channels:
         print(f"[WARN] Папка '{folder_name}' не найдена или пуста")
