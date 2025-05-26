@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 # Пользователь @avdovin для спортивной рассылки
 SPORT_USER_ID = None  # Нужно будет получить user_id для @avdovin
-SPORT_FOLDER_NAME = "Sport"
+SPORT_FOLDER_NAME = "Спорт"  # Измените на правильное название папки
 SPORT_CHANNELS_FILE = "sport_channels.json"
 
 def load_sport_channels():
