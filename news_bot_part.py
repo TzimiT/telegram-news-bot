@@ -42,6 +42,10 @@ def get_yesterday_range():
 
 def summarize_news(news_list):
     text = "\n\n".join(news_list)
+    # Ограничиваем входной текст до ~15000 токенов (примерно 60000 символов)
+    if len(text) > 60000:
+        text = text[:60000] + "\n[...текст обрезан для соответствия лимитам...]"
+    
     client_ai = openai.OpenAI(api_key=openai_api_key)
     response = client_ai.chat.completions.create(
         model="gpt-4o-mini",
@@ -49,7 +53,7 @@ def summarize_news(news_list):
             {"role": "system", "content": "Сделай краткую сводку новостей за сутки по этим выдержкам, обязательно указывай источники. Если несколько новостей про одно и то же - кластеризуй в один пункт. Подробнее освещай всё про AI."},
             {"role": "user", "content": text}
         ],
-        max_tokens=3000,
+        max_tokens=6000,
         temperature=0.7
     )
     return response.choices[0].message.content

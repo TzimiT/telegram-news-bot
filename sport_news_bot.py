@@ -44,6 +44,10 @@ def get_yesterday_range():
 def summarize_sport_news(news_list):
     """Суммаризация спортивных новостей с фокусом на спорт"""
     text = "\n\n".join(news_list)
+    # Ограничиваем входной текст до ~15000 токенов (примерно 60000 символов)
+    if len(text) > 60000:
+        text = text[:60000] + "\n[...текст обрезан для соответствия лимитам...]"
+    
     client_ai = openai.OpenAI(api_key=openai_api_key)
     response = client_ai.chat.completions.create(
         model="gpt-4o-mini",
@@ -51,7 +55,7 @@ def summarize_sport_news(news_list):
             {"role": "system", "content": "Сделай краткую сводку спортивных новостей за сутки по этим выдержкам, обязательно указывай источники. Если несколько новостей про одно и то же событие - кластеризуй в один пункт. Группируй новости по видам спорта. Подробнее освещай важные спортивные события, результаты матчей, трансферы и турниры."},
             {"role": "user", "content": text}
         ],
-        max_tokens=3000,
+        max_tokens=6000,
         temperature=0.7
     )
     return response.choices[0].message.content
