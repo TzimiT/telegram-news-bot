@@ -1,85 +1,105 @@
 import logging
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
-from datetime import datetime, timezone
 import json
-import os
+from datetime import datetime
+from telegram import Update
+from telegram.ext import (
+    ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
+)
+import config
 
-SUBSCRIBERS_FILE = 'subscribers.json'
+SUBSCRIBERS_FILE = "subscribers.json"
 
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
-
 logger = logging.getLogger(__name__)
 
 def load_subscribers():
-    if not os.path.exists(SUBSCRIBERS_FILE):
-        return {"subscribers": []}
     try:
-        with open(SUBSCRIBERS_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
+        with open(SUBSCRIBERS_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data.get("subscribers", [])
+    except FileNotFoundError:
+        logger.warning("Файл с подписчиками не найден, создаём новый.")
+        return []
     except Exception as e:
         logger.error(f"Ошибка чтения {SUBSCRIBERS_FILE}: {e}")
-        return {"subscribers": []}
+        return []
 
-def save_subscribers(subscribers_data):
+def save_subscribers(subscribers):
     try:
-        with open(SUBSCRIBERS_FILE, 'w', encoding='utf-8') as f:
-            json.dump(subscribers_data, f, ensure_ascii=False, indent=2)
+        with open(SUBSCRIBERS_FILE, "w", encoding="utf-8") as f:
+            json.dump({"subscribers": subscribers}, f, ensure_ascii=False, indent=2)
     except Exception as e:
         logger.error(f"Ошибка записи {SUBSCRIBERS_FILE}: {e}")
 
-def add_or_update_subscriber(user: Update.effective_user):
-    data = load_subscribers()
-    subscribers = data.get("subscribers", [])
+def find_subscriber(subscribers, user_id):
+    return next((user for user in subscribers if user["user_id"] == user_id), None)
 
-    user_data = {
-        "user_id": user.id,
-        "first_name": user.first_name or "",
-        "last_name": user.last_name or "",
-        "username": user.username or "",
-        "added_at": datetime.now(timezone.utc).isoformat(),
-        "language_code": getattr(user, "language_code", "")
-    }
+def add_subscriber(user):
+    subscribers = load_subscribers()
+    if find_subscriber(subscribers, user["user_id"]) is None:
+        subscribers.append(user)
+        save_subscribers(subscribers)
+        logger.info(f"[NEW SUBSCRIBER] {user}")
+        return True
+    return False
 
-    # Проверка: если есть такой user_id — не добавляем заново, можно обновить инфу
-    for sub in subscribers:
-        if sub["user_id"] == user.id:
-            # обновляем только данные, но не дату добавления
-            sub.update({k: v for k, v in user_data.items() if k != "added_at"})
-            break
-    else:
-        # Новый подписчик
-        subscribers.append(user_data)
-        logger.info(f"Добавлен новый подписчик: {user_data}")
-
-    data["subscribers"] = subscribers
-    save_subscribers(data)
+def remove_subscriber(user_id):
+    subscribers = load_subscribers()
+    new_subs = [user for user in subscribers if user["user_id"] != user_id]
+    if len(new_subs) < len(subscribers):
+        save_subscribers(new_subs)
+        logger.info(f"[UNSUBSCRIBED] user_id={user_id}")
+        return True
+    return False
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    add_or_update_subscriber(user)
-    await update.message.reply_text(
-        "Привет! Ты добавлен в рассылку новостей."
-    )
+    user_obj = {
+        "user_id": user.id,
+        "username": user.username or "",
+        "first_name": user.first_name or "",
+        "last_name": user.last_name or "",
+        "joined": datetime.utcnow().isoformat()
+    }
+    if add_subscriber(user_obj):
+        await update.message.reply_text("Привет! Ты добавлен в рассылку новостей.")
+    else:
+        await update.message.reply_text("Ты уже подписан на рассылку.")
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Напиши любое сообщение, чтобы подписаться на рассылку.")
+    await update.message.reply_text("Напиши любое сообщение, чтобы подписаться на рассылку.\nКоманда /stop — отписаться от рассылки.")
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    add_or_update_subscriber(user)
-    await update.message.reply_text("Спасибо за сообщение! Ты подписан на рассылку.")
+    user_obj = {
+        "user_id": user.id,
+        "username": user.username or "",
+        "first_name": user.first_name or "",
+        "last_name": user.last_name or "",
+        "joined": datetime.utcnow().isoformat()
+    }
+    if add_subscriber(user_obj):
+        await update.message.reply_text("Спасибо за сообщение! Ты подписан на рассылку.")
+    else:
+        await update.message.reply_text("Ты уже подписан на рассылку.")
+
+async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    if remove_subscriber(user_id):
+        await update.message.reply_text("Вы успешно отписались от рассылки.")
+    else:
+        await update.message.reply_text("Вы не были в списке подписчиков.")
 
 def main():
-    import config
     app = ApplicationBuilder().token(config.telegram_bot_token).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help_command))
+    app.add_handler(CommandHandler("stop", stop))
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))
-    print("Бот запущен, ожидает сообщений...")
+    logger.info("Бот запущен, ожидает сообщений...")
     app.run_polling()
 
 if __name__ == '__main__':

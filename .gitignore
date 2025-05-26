@@ -2,6 +2,7 @@
 config.py
 commands.txt
 subscribers.txt
+subscribers.json
 
 # Python cache
 __pycache__/
