@@ -168,6 +168,29 @@ class UserDatabase:
         conn.commit()
         conn.close()
     
+    def get_channel_recommendations(self) -> List[Dict]:
+        """Получить все рекомендации каналов"""
+        conn = self._get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT id, user_id, recommendation, created_at
+            FROM channel_recommendations
+            ORDER BY created_at DESC
+        ''')
+        
+        recommendations = []
+        for row in cursor.fetchall():
+            recommendations.append({
+                'id': row[0],
+                'user_id': row[1],
+                'recommendation': row[2],
+                'created_at': row[3]
+            })
+        
+        conn.close()
+        return recommendations
+    
     def get_user_stats(self) -> Dict:
         """Получить общую статистику пользователей"""
         conn = self._get_connection()
