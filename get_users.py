@@ -147,6 +147,30 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CommandHandler("stop", stop_command))
+    app.add_handler(CommandHandler("status", status_command))
+    app.add_handler(CommandHandler("channels", channels_command))
+
+    # Conversation handler для рекомендации каналов
+    recommend_conv_handler = ConversationHandler(
+        entry_points=[CommandHandler("recommend_channel", recommend_channel_start)],
+        states={
+            RECOMMEND_WAIT_INPUT: [MessageHandler(filters.TEXT & ~filters.COMMAND, recommend_channel_receive)]
+        },
+        fallbacks=[CommandHandler("cancel", recommend_channel_cancel)]
+    )
+    app.add_handler(recommend_conv_handler)
+
+    # Обработчик всех остальных сообщений
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
+
+    print("🤖 Бот запущен и ожидает сообщения...")
+    print("Нажмите Ctrl+C для остановки")
+    
+    # Запускаем polling для непрерывной работы
+    app.run_polling()
+
+if __name__ == "__main__":
+    main()top_command))
     app.add_handler(CommandHandler("channels", channels_command))
     app.add_handler(CommandHandler("status", status_command))
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))
