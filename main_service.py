@@ -42,10 +42,14 @@ async def main():
     news_task = asyncio.create_task(news_service())
     tasks.append(news_task)
 
-    # 2. Запускаем пользовательский бот в отдельном потоке
+    # 2. Запускаем пользовательский бот в отдельном потоке с правильным event loop
     logger.info("👥 Запуск User Collection Bot...")
     def run_user_bot():
         try:
+            # Создаем новый event loop для этого потока
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            
             from get_users import main as user_bot_main
             user_bot_main()
         except Exception as e:
