@@ -24,6 +24,8 @@ wheels/
 # Telegram session files
 sessions/*.session
 sessions/*.session-journal
+*.session
+*.session-journal
 
 # Database files
 *.db
