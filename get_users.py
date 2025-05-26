@@ -57,7 +57,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/recommend_channel — предложить новый источник новостей/канал в телеге про AI\n"
         "/channels — список каналов для агрегации\n"
         "/status — твой статус подписки\n"
-        "/help — показать это сообщение"
+        "/help — показать это сообщение",
+        parse_mode='Markdown'
     )
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
