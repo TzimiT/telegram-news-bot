@@ -9,10 +9,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Файлы Telethon-сессий (содержат авторизационные данные)
+# Файлы сессии
 *.session
 *.session-journal
-news_session.session*
+bot_sessions/
 
 # Логи
 *.log

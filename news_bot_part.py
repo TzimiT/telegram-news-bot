@@ -1,3 +1,6 @@
+The code is modified to include device information when creating the TelegramClient to prevent session conflicts.
+```
+```replit_final_file
 from telethon import TelegramClient
 from telegram import Bot
 import openai
@@ -46,7 +49,7 @@ def check_and_migrate_old_subscribers():
         try:
             with open(old_file, 'r', encoding='utf-8') as f:
                 old_data = json.load(f)
-            
+
             if "subscribers" in old_data and isinstance(old_data["subscribers"], list):
                 # Проверяем, содержит ли старые данные просто ID или уже структурированные данные
                 if old_data["subscribers"] and isinstance(old_data["subscribers"][0], int):
@@ -61,10 +64,10 @@ def check_and_migrate_old_subscribers():
                             "added_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                             "migrated": True
                         })
-                    
+
                     with open(SUBSCRIBERS_FILE, 'w', encoding='utf-8') as f:
                         json.dump({"subscribers": new_subscribers}, f, ensure_ascii=False, indent=2)
-                    
+
                     logger.info(f"[INFO] Мигрировано {len(new_subscribers)} подписчиков из старого файла")
                     return new_subscribers
         except Exception as e:
@@ -114,7 +117,7 @@ async def get_news(client, channels):
 async def send_news(summary):
     # Проверяем и мигрируем старых подписчиков
     check_and_migrate_old_subscribers()
-    
+
     subscribers = load_subscribers()
     if not subscribers:
         logger.warning("[WARN] Нет подписчиков для рассылки.")
@@ -139,19 +142,19 @@ async def send_news(summary):
     try:
         with open(SUBSCRIBERS_FILE, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        
+
         original_count = len(data.get('subscribers', []))
         new_subs = [sub for sub in data.get('subscribers',[]) if sub['user_id'] in active_subscribers]
         removed_count = original_count - len(new_subs)
-        
+
         with open(SUBSCRIBERS_FILE, 'w', encoding='utf-8') as f:
             json.dump({"subscribers": new_subs}, f, ensure_ascii=False, indent=2)
-        
+
         logger.info(f"[INFO] Обновлен список подписчиков: активных={len(active_subscribers)}, удалено={removed_count}")
-        
+
         if failed_subscribers:
             logger.warning(f"[INFO] Неактивные подписчики удалены: {failed_subscribers}")
-            
+
     except Exception as e:
         logger.error(f"[ERROR] Ошибка обновления активных подписчиков: {e}")
 
@@ -160,7 +163,7 @@ SESSION_FILE = 'news_session'
 async def main():
     # Проверяем и мигрируем старых подписчиков перед началом работы
     check_and_migrate_old_subscribers()
-    
+
     # Проверяем наличие файла сессии
     if not os.path.exists(f"{SESSION_FILE}.session"):
         print(f"❌ Файл сессии {SESSION_FILE}.session не найден!")
@@ -168,11 +171,25 @@ async def main():
         return
     else:
         print(f"✅ Файл сессии {SESSION_FILE}.session найден")
-    
-    async with TelegramClient(SESSION_FILE, api_id, api_hash) as client:
+
+    async with TelegramClient(
+        SESSION_FILE, 
+        api_id, 
+        api_hash,
+        device_model="News Aggregator Bot",
+        system_version="1.0", 
+        app_version="1.0",
+        lang_code="ru",
+        system_lang_code="ru"
+    ) as client:
+        # Проверяем авторизацию без интерактивного ввода
+        await client.connect()
+        if not await client.is_user_authorized():
+            print("❌ Сессия не авторизована! Запустите workflow 'Setup Session' для повторной авторизации.")
+            return
         # Шаг 1: Получить и сохранить полную инфу о каналах из папки
         await get_channels_fullinfo_from_folder(client, FOLDER_NAME)
-        # Шаг 2: Загрузить полную инфу о каналах для рассылки</old_str>
+        # Шаг 2: Загрузить полную инфу о каналах для рассылки
         channels = load_channels_from_json()
         print(f"[LOG] Каналы для агрегации: {[ch.get('username','?') for ch in channels]}")
 

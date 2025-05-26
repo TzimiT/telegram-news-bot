@@ -6,11 +6,25 @@ import os
 import asyncio
 
 CHANNELS_FILE = "channels.json"
-SESSION_FILE = 'news_session'
+# Используем ту же изолированную сессию что и в session_manager
+SESSION_DIR = 'bot_sessions'  
+SESSION_FILE = os.path.join(SESSION_DIR, 'news_aggregator_session')
+
+# Создаем папку если её нет
+os.makedirs(SESSION_DIR, exist_ok=True)
 
 async def main():
     """Основная функция для получения каналов"""
-    async with TelegramClient(SESSION_FILE, api_id, api_hash) as client:
+    async with TelegramClient(
+        SESSION_FILE, 
+        api_id, 
+        api_hash,
+        device_model="News Aggregator Bot",
+        system_version="1.0",
+        app_version="1.0", 
+        lang_code="ru",
+        system_lang_code="ru"
+    ) as client:
         channels = await get_channels_fullinfo_from_folder(client, "GPT")
         print(f"Найдено каналов: {len(channels)}")
         for ch in channels:
