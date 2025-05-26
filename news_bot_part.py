@@ -1,32 +1,42 @@
-# news_bot_part.py
-
 from telethon.sync import TelegramClient
 from telegram import Bot
 import openai
-from config import api_id, api_hash, telegram_bot_token, openai_api_key, FOLDER_NAME, SUBSCRIBERS_FILE
+from config import api_id, api_hash, telegram_bot_token, openai_api_key, FOLDER_NAME
 from get_channels import get_channel_usernames_from_folder
 import asyncio
 from datetime import datetime, timedelta, timezone
+import json
+import os
+
+SUBSCRIBERS_FILE = 'subscribers.json'
 
 def load_subscribers():
-    try:
-        with open(SUBSCRIBERS_FILE, 'r') as f:
-            return [int(line.strip()) for line in f if line.strip()]
-    except FileNotFoundError:
+    """ Загружает user_id всех активных подписчиков из JSON. """
+    if not os.path.exists(SUBSCRIBERS_FILE):
         print("[WARN] Файл с подписчиками не найден, список пуст")
         return []
+    try:
+        with open(SUBSCRIBERS_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
 
-def save_subscriber(user_id):
-    subscribers = set(load_subscribers())
-    if user_id not in subscribers:
-        subscribers.add(user_id)
-        with open(SUBSCRIBERS_FILE, 'w') as f:
-            for sub in subscribers:
-                f.write(f"{sub}\n")
-        print(f"[LOG] Добавлен новый подписчик: {user_id}")
+        # Обработка случая старого формата (просто список int)
+        if isinstance(data, list):
+            # Переписываем файл в новый формат
+            new_data = {"subscribers": [{"user_id": uid} for uid in data]}
+            with open(SUBSCRIBERS_FILE, 'w', encoding='utf-8') as fw:
+                json.dump(new_data, fw, ensure_ascii=False, indent=2)
+            data = new_data
 
-async def update_subscribers():
-    print("[LOG] Обновление подписчиков: ")
+        subscribers = []
+        for sub in data.get("subscribers", []):
+            if isinstance(sub, dict) and sub.get("user_id"):
+                subscribers.append(sub["user_id"])
+            elif isinstance(sub, int):  # fallback, если формат вдруг сломан
+                subscribers.append(sub)
+        return subscribers
+    except Exception as e:
+        print(f"[ERROR] Ошибка чтения {SUBSCRIBERS_FILE}: {e}")
+        return []
 
 def get_yesterday_range():
     today = datetime.now(timezone.utc).date()
@@ -38,7 +48,12 @@ client = TelegramClient('anon_news', api_id, api_hash)
 bot = Bot(token=telegram_bot_token)
 client_ai = openai.OpenAI(api_key=openai_api_key)
 
-async def get_news(channel_usernames):
+async def update_channels():
+    global channel_usernames
+    channel_usernames = await get_channel_usernames_from_folder(FOLDER_NAME)
+    print(f"[LOG] Обновлён список каналов: {channel_usernames}")
+
+async def get_news():
     all_news = []
     start, end = get_yesterday_range()
     print(f"[DEBUG] Диапазон фильтра: {start} ... {end}")
@@ -48,7 +63,6 @@ async def get_news(channel_usernames):
             if msg_date.tzinfo is None:
                 msg_date = msg_date.replace(tzinfo=timezone.utc)
             msg_date_norm = msg_date.replace(microsecond=0)
-
             if msg_date_norm < start:
                 break
             if start <= msg_date_norm < end:
@@ -62,10 +76,10 @@ def summarize_news(news_list):
     response = client_ai.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "Сделай краткую сводку новостей за сутки по этим выдержкам, в виде япоского хоку обязательно указывай источники."},
+            {"role": "system", "content": "Сделай краткую сводку новостей за сутки по этим выдержкам, обязательно указывай источники."},
             {"role": "user", "content": text}
         ],
-        max_tokens=4096,
+        max_tokens=1000,
         temperature=0.7
     )
     return response.choices[0].message.content
@@ -77,7 +91,6 @@ async def send_news(summary):
         return
 
     active_subscribers = []
-
     for user_id in subscribers:
         try:
             result = await bot.send_message(chat_id=user_id, text=summary)
@@ -86,27 +99,14 @@ async def send_news(summary):
         except Exception as e:
             print(f"[ERROR] Не удалось отправить сообщение пользователю {user_id}: {e}")
 
-    with open(SUBSCRIBERS_FILE, 'w') as f:
-        for user_id in active_subscribers:
-            f.write(f"{user_id}\n")
-
 async def main():
     await client.start()
-
-    # 1) Обновляем подписчиков
-    await update_subscribers()
-
-    # 2) Обновляем список каналов из папки
-    channel_usernames = await get_channel_usernames_from_folder(FOLDER_NAME)
-    print(f"[LOG] Обновлён список каналов: {channel_usernames}")
-
-    # 3) Собираем новости и рассылаем
-    news = await get_news(channel_usernames)
+    await update_channels()
+    news = await get_news()
     print(f"[LOG] Количество найденных новостей за вчера: {len(news)}")
     if not news:
         print("[LOG] Нет новостей за вчера. Прерываю рассылку.")
         return
-
     summary = summarize_news(news)
     await send_news(summary)
 

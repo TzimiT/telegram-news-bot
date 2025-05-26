@@ -1,0 +1,54 @@
+{
+  "subscribers": [
+    {
+      "user_id": 94598500,
+      "first_name": "Alexey",
+      "last_name": "Vdovin",
+      "username": "AVdovin",
+      "added_at": "2025-05-25T21:57:36.959760+00:00",
+      "language_code": "en"
+    },
+    {
+      "user_id": 316725353,
+      "first_name": "-",
+      "last_name": "-",
+      "username": "-",
+      "added_at": "2025-05-26T00:00:00Z"
+    },
+    {
+      "user_id": 5671784074,
+      "first_name": "-",
+      "last_name": "-",
+      "username": "-",
+      "added_at": "2025-05-26T00:00:00Z"
+    },
+    {
+      "user_id": 243239381,
+      "first_name": "-",
+      "last_name": "-",
+      "username": "-",
+      "added_at": "2025-05-26T00:00:00Z"
+    },
+    {
+      "user_id": 452159772,
+      "first_name": "-",
+      "last_name": "-",
+      "username": "-",
+      "added_at": "2025-05-26T00:00:00Z"
+    },
+    {
+      "user_id": 5266043,
+      "first_name": "-",
+      "last_name": "-",
+      "username": "-",
+      "added_at": "2025-05-26T00:00:00Z"
+    },
+    {
+      "user_id": 236384028,
+      "first_name": "-",
+      "last_name": "-",
+      "username": "-",
+      "added_at": "2025-05-26T00:00:00Z"
+    }
+  ]
+}
