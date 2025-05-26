@@ -6,21 +6,70 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 import json
 import os
+import logging
 from get_channels import get_channels_fullinfo_from_folder, load_channels_from_json
+
+# Настройка логирования
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('subscribers_log.txt', encoding='utf-8'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 
 SUBSCRIBERS_FILE = "subscribers.json"
 
 def load_subscribers():
     if not os.path.exists(SUBSCRIBERS_FILE):
-        print("[WARN] Файл с подписчиками не найден, список пуст")
+        logger.warning("[WARN] Файл с подписчиками не найден, создаю новый")
+        # Создаем пустой файл с правильной структурой
+        with open(SUBSCRIBERS_FILE, 'w', encoding='utf-8') as f:
+            json.dump({"subscribers": []}, f, ensure_ascii=False, indent=2)
         return []
     try:
         with open(SUBSCRIBERS_FILE, 'r', encoding='utf-8') as f:
             data = json.load(f)
-            return [item['user_id'] for item in data.get('subscribers',[])]
+            subscribers = data.get('subscribers', [])
+            logger.info(f"[INFO] Загружено {len(subscribers)} подписчиков")
+            return [item['user_id'] for item in subscribers]
     except Exception as e:
-        print(f"[ERROR] Ошибка чтения {SUBSCRIBERS_FILE}: {e}")
+        logger.error(f"[ERROR] Ошибка чтения {SUBSCRIBERS_FILE}: {e}")
         return []
+
+def check_and_migrate_old_subscribers():
+    """Проверяет старый формат подписчиков и мигрирует в новый"""
+    old_file = "subscribers_old.json"
+    if os.path.exists(old_file):
+        try:
+            with open(old_file, 'r', encoding='utf-8') as f:
+                old_data = json.load(f)
+            
+            if "subscribers" in old_data and isinstance(old_data["subscribers"], list):
+                # Проверяем, содержит ли старые данные просто ID или уже структурированные данные
+                if old_data["subscribers"] and isinstance(old_data["subscribers"][0], int):
+                    logger.info("[INFO] Найден старый формат подписчиков, мигрирую...")
+                    new_subscribers = []
+                    for user_id in old_data["subscribers"]:
+                        new_subscribers.append({
+                            "user_id": user_id,
+                            "username": "-",
+                            "first_name": "-", 
+                            "last_name": "-",
+                            "added_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                            "migrated": True
+                        })
+                    
+                    with open(SUBSCRIBERS_FILE, 'w', encoding='utf-8') as f:
+                        json.dump({"subscribers": new_subscribers}, f, ensure_ascii=False, indent=2)
+                    
+                    logger.info(f"[INFO] Мигрировано {len(new_subscribers)} подписчиков из старого файла")
+                    return new_subscribers
+        except Exception as e:
+            logger.error(f"[ERROR] Ошибка миграции старых подписчиков: {e}")
+    return []
 
 def get_yesterday_range():
     today = datetime.now(timezone.utc).date()
@@ -63,37 +112,57 @@ async def get_news(client, channels):
     return all_news
 
 async def send_news(summary):
+    # Проверяем и мигрируем старых подписчиков
+    check_and_migrate_old_subscribers()
+    
     subscribers = load_subscribers()
     if not subscribers:
-        print("[WARN] Нет подписчиков для рассылки.")
+        logger.warning("[WARN] Нет подписчиков для рассылки.")
         return
 
     bot = Bot(token=telegram_bot_token)
     active_subscribers = []
+    failed_subscribers = []
+
+    logger.info(f"[INFO] Начинаю рассылку для {len(subscribers)} подписчиков")
 
     for user_id in subscribers:
         try:
             result = await bot.send_message(chat_id=user_id, text=summary)
-            print(f"[LOG] Сообщение успешно отправлено пользователю {user_id}, message_id={result.message_id}")
+            logger.info(f"[SUCCESS] Сообщение отправлено пользователю {user_id}, message_id={result.message_id}")
             active_subscribers.append(user_id)
         except Exception as e:
-            print(f"[ERROR] Не удалось отправить сообщение пользователю {user_id}: {e}")
+            logger.error(f"[FAILED] Не удалось отправить сообщение пользователю {user_id}: {e}")
+            failed_subscribers.append(user_id)
 
-    # Оставляем в файле только активных подписчиков
+    # Обновляем файл подписчиков, удаляя неактивных
     try:
         with open(SUBSCRIBERS_FILE, 'r', encoding='utf-8') as f:
             data = json.load(f)
+        
+        original_count = len(data.get('subscribers', []))
         new_subs = [sub for sub in data.get('subscribers',[]) if sub['user_id'] in active_subscribers]
+        removed_count = original_count - len(new_subs)
+        
         with open(SUBSCRIBERS_FILE, 'w', encoding='utf-8') as f:
             json.dump({"subscribers": new_subs}, f, ensure_ascii=False, indent=2)
+        
+        logger.info(f"[INFO] Обновлен список подписчиков: активных={len(active_subscribers)}, удалено={removed_count}")
+        
+        if failed_subscribers:
+            logger.warning(f"[INFO] Неактивные подписчики удалены: {failed_subscribers}")
+            
     except Exception as e:
-        print(f"[ERROR] Ошибка обновления активных подписчиков: {e}")
+        logger.error(f"[ERROR] Ошибка обновления активных подписчиков: {e}")
 
 async def main():
+    # Проверяем и мигрируем старых подписчиков перед началом работы
+    check_and_migrate_old_subscribers()
+    
     async with TelegramClient('news_session.session', api_id, api_hash) as client:
         # Шаг 1: Получить и сохранить полную инфу о каналах из папки
         await get_channels_fullinfo_from_folder(client, FOLDER_NAME)
-        # Шаг 2: Загрузить полную инфу о каналах для рассылки
+        # Шаг 2: Загрузить полную инфу о каналах для рассылки</old_str>
         channels = load_channels_from_json()
         print(f"[LOG] Каналы для агрегации: {[ch.get('username','?') for ch in channels]}")
 
