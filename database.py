@@ -40,9 +40,22 @@ class PostgresDatabase:
                     username VARCHAR(255),
                     first_name VARCHAR(255),
                     last_name VARCHAR(255),
+                    full_name VARCHAR(511),
+                    language_code VARCHAR(10),
+                    is_bot BOOLEAN DEFAULT false,
+                    is_premium BOOLEAN DEFAULT false,
+                    added_via_link BOOLEAN DEFAULT false,
+                    can_join_groups BOOLEAN,
+                    can_read_all_group_messages BOOLEAN,
+                    supports_inline_queries BOOLEAN,
+                    is_verified BOOLEAN DEFAULT false,
+                    is_restricted BOOLEAN DEFAULT false,
+                    is_scam BOOLEAN DEFAULT false,
+                    is_fake BOOLEAN DEFAULT false,
                     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     is_active BOOLEAN DEFAULT true,
-                    last_interaction TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    last_interaction TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    user_data JSONB
                 )
             ''')
             
@@ -144,23 +157,75 @@ class PostgresDatabase:
             cursor.close()
             conn.close()
     
-    def add_user(self, user_id: int, username: str = None, first_name: str = None, last_name: str = None) -> bool:
-        """Добавить пользователя в базу"""
+    def add_user(self, user_id: int, username: str = None, first_name: str = None, last_name: str = None, user_data: dict = None) -> bool:
+        """Добавить пользователя в базу с расширенной информацией"""
         conn = self._get_connection()
         cursor = conn.cursor()
         
         try:
+            # Извлекаем данные из user_data если переданы
+            if user_data:
+                language_code = user_data.get('language_code')
+                is_bot = user_data.get('is_bot', False)
+                is_premium = user_data.get('is_premium', False)
+                added_via_link = user_data.get('added_via_link', False)
+                can_join_groups = user_data.get('can_join_groups')
+                can_read_all_group_messages = user_data.get('can_read_all_group_messages')
+                supports_inline_queries = user_data.get('supports_inline_queries')
+                is_verified = user_data.get('is_verified', False)
+                is_restricted = user_data.get('is_restricted', False)
+                is_scam = user_data.get('is_scam', False)
+                is_fake = user_data.get('is_fake', False)
+            else:
+                language_code = None
+                is_bot = False
+                is_premium = False
+                added_via_link = False
+                can_join_groups = None
+                can_read_all_group_messages = None
+                supports_inline_queries = None
+                is_verified = False
+                is_restricted = False
+                is_scam = False
+                is_fake = False
+            
+            # Формируем полное имя
+            full_name = f"{first_name or ''} {last_name or ''}".strip()
+            
             cursor.execute('''
-                INSERT INTO users (user_id, username, first_name, last_name, added_at, is_active, last_interaction)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO users (
+                    user_id, username, first_name, last_name, full_name, 
+                    language_code, is_bot, is_premium, added_via_link,
+                    can_join_groups, can_read_all_group_messages, supports_inline_queries,
+                    is_verified, is_restricted, is_scam, is_fake,
+                    added_at, is_active, last_interaction, user_data
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (user_id) DO UPDATE SET
                     username = EXCLUDED.username,
                     first_name = EXCLUDED.first_name,
                     last_name = EXCLUDED.last_name,
+                    full_name = EXCLUDED.full_name,
+                    language_code = EXCLUDED.language_code,
+                    is_bot = EXCLUDED.is_bot,
+                    is_premium = EXCLUDED.is_premium,
+                    can_join_groups = EXCLUDED.can_join_groups,
+                    can_read_all_group_messages = EXCLUDED.can_read_all_group_messages,
+                    supports_inline_queries = EXCLUDED.supports_inline_queries,
+                    is_verified = EXCLUDED.is_verified,
+                    is_restricted = EXCLUDED.is_restricted,
+                    is_scam = EXCLUDED.is_scam,
+                    is_fake = EXCLUDED.is_fake,
                     is_active = true,
-                    last_interaction = EXCLUDED.last_interaction
-            ''', (user_id, username or "-", first_name or "-", last_name or "-", 
-                  datetime.now(), True, datetime.now()))
+                    last_interaction = EXCLUDED.last_interaction,
+                    user_data = EXCLUDED.user_data
+            ''', (
+                user_id, username or "-", first_name or "-", last_name or "-", full_name,
+                language_code, is_bot, is_premium, added_via_link,
+                can_join_groups, can_read_all_group_messages, supports_inline_queries,
+                is_verified, is_restricted, is_scam, is_fake,
+                datetime.now(), True, datetime.now(), json.dumps(user_data) if user_data else None
+            ))
             
             # Добавляем статистику для пользователя
             cursor.execute('''
@@ -211,13 +276,17 @@ class PostgresDatabase:
             conn.close()
     
     def get_user_info(self, user_id: int) -> Optional[Dict]:
-        """Получить информацию о пользователе"""
+        """Получить полную информацию о пользователе"""
         conn = self._get_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         
         try:
             cursor.execute('''
-                SELECT user_id, username, first_name, last_name, added_at, is_active, last_interaction
+                SELECT user_id, username, first_name, last_name, full_name,
+                       language_code, is_bot, is_premium, added_via_link,
+                       can_join_groups, can_read_all_group_messages, supports_inline_queries,
+                       is_verified, is_restricted, is_scam, is_fake,
+                       added_at, is_active, last_interaction, user_data
                 FROM users WHERE user_id = %s
             ''', (user_id,))
             

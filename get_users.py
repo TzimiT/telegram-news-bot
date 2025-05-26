@@ -61,21 +61,46 @@ def get_channels_list():
         return "📭 Ошибка загрузки списка каналов"
 
 def save_subscriber(user: Update.effective_user):
-    """Сохранить подписчика в базу данных"""
+    """Сохранить подписчика в базу данных с полной информацией"""
+    # Собираем максимально полную информацию о пользователе
+    user_data = {
+        'language_code': getattr(user, 'language_code', None),
+        'is_bot': getattr(user, 'is_bot', False),
+        'is_premium': getattr(user, 'is_premium', False),
+        'added_via_link': getattr(user, 'added_via_link', False),
+        'can_join_groups': getattr(user, 'can_join_groups', None),
+        'can_read_all_group_messages': getattr(user, 'can_read_all_group_messages', None),
+        'supports_inline_queries': getattr(user, 'supports_inline_queries', None),
+        'is_verified': getattr(user, 'is_verified', False),
+        'is_restricted': getattr(user, 'is_restricted', False),
+        'is_scam': getattr(user, 'is_scam', False),
+        'is_fake': getattr(user, 'is_fake', False),
+        'collected_at': datetime.now(timezone.utc).isoformat()
+    }
+    
+    # Логируем собранную информацию
+    logger.info(f"Собираем информацию о пользователе {user.id}: "
+               f"username=@{user.username}, name={user.first_name} {user.last_name}, "
+               f"lang={user_data['language_code']}, premium={user_data['is_premium']}, "
+               f"verified={user_data['is_verified']}")
+    
     existing_user = db.get_user_info(user.id)
     if not existing_user or not existing_user['is_active']:
         success = db.add_user(
             user.id,
             user.username,
             user.first_name,
-            user.last_name
+            user.last_name,
+            user_data
         )
         if success:
-            logger.info(f"Добавлен новый подписчик: {user.id} (@{user.username})")
+            logger.info(f"Добавлен новый подписчик: {user.id} (@{user.username}) с полной информацией")
             return True
     else:
-        # Обновляем время взаимодействия
+        # Обновляем время взаимодействия и информацию о пользователе
         db.update_user_interaction(user.id)
+        # Также обновляем информацию пользователя на случай изменений
+        db.add_user(user.id, user.username, user.first_name, user.last_name, user_data)
     return False
 
 def remove_subscriber(user_id):
@@ -191,12 +216,25 @@ async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if user_info and user_info['is_active']:
         stats = db.get_user_stats()
-        await update.message.reply_text(
+        
+        # Формируем расширенную информацию о пользователе
+        premium_status = "💎 Premium" if user_info.get('is_premium') else "👤 Regular"
+        verified_status = "✅ Verified" if user_info.get('is_verified') else ""
+        language = user_info.get('language_code', 'не указан')
+        
+        message = (
             f"✅ **Статус подписки:** Ты подписан на рассылку агрегации новостей про AI\n\n"
+            f"👤 **Твоя информация:**\n"
+            f"   • Имя: {user_info.get('full_name', 'не указано')}\n"
+            f"   • Username: @{user_info.get('username', 'не указан')}\n"
+            f"   • Язык: {language}\n"
+            f"   • Статус: {premium_status} {verified_status}\n\n"
             f"📊 Всего активных подписчиков: {stats['active_users']}\n"
             f"📅 Дата подписки: {user_info['added_at']}\n"
             f"🕐 Последняя активность: {user_info['last_interaction']}"
         )
+        
+        await update.message.reply_text(message)
     else:
         await update.message.reply_text(
             "❌ **Статус подписки:** Ты НЕ подписан на рассылку агрегации новостей про AI\n\n"
