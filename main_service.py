@@ -46,16 +46,23 @@ async def main():
     logger.info("👥 Запуск User Collection Bot...")
     def run_user_bot():
         try:
-            # Создаем новый event loop для потока
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            # Запускаем main функцию из get_users
-            user_bot()
+            # Импортируем здесь чтобы избежать конфликтов
+            import subprocess
+            import sys
+            
+            # Запускаем пользовательский бот как отдельный процесс
+            subprocess.Popen([sys.executable, "get_users.py"], 
+                           stdout=subprocess.PIPE, 
+                           stderr=subprocess.PIPE)
+            logger.info("✅ User Collection Bot запущен как отдельный процесс")
         except Exception as e:
-            logger.error(f"❌ Ошибка в User Bot: {e}")
+            logger.error(f"❌ Ошибка запуска User Bot: {e}")
 
     user_bot_thread = threading.Thread(target=run_user_bot, daemon=True)
     user_bot_thread.start()
+    
+    # Небольшая задержка для корректного запуска
+    await asyncio.sleep(2)
 
     logger.info("✅ Все сервисы запущены и работают 24/7")
     logger.info("📋 Активные сервисы:")
