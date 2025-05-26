@@ -1,104 +1,168 @@
 import logging
-import json
-from datetime import datetime
 from telegram import Update
 from telegram.ext import (
-    ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
+    ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes, ConversationHandler
 )
-import config
+import json
+import os
+from datetime import datetime
 
 SUBSCRIBERS_FILE = "subscribers.json"
+RECOMMEND_WAIT_INPUT = 1
 
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
+
 logger = logging.getLogger(__name__)
 
 def load_subscribers():
+    if not os.path.exists(SUBSCRIBERS_FILE):
+        logger.warning("[WARN] Файл с подписчиками не найден, список пуст")
+        return []
     try:
-        with open(SUBSCRIBERS_FILE, "r", encoding="utf-8") as f:
+        with open(SUBSCRIBERS_FILE, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        return data.get("subscribers", [])
-    except FileNotFoundError:
-        logger.warning("Файл с подписчиками не найден, создаём новый.")
-        return []
+            return data.get('subscribers', [])
     except Exception as e:
-        logger.error(f"Ошибка чтения {SUBSCRIBERS_FILE}: {e}")
+        logger.error(f"[ERROR] Ошибка чтения {SUBSCRIBERS_FILE}: {e}")
         return []
 
-def save_subscribers(subscribers):
-    try:
-        with open(SUBSCRIBERS_FILE, "w", encoding="utf-8") as f:
-            json.dump({"subscribers": subscribers}, f, ensure_ascii=False, indent=2)
-    except Exception as e:
-        logger.error(f"Ошибка записи {SUBSCRIBERS_FILE}: {e}")
-
-def find_subscriber(subscribers, user_id):
-    return next((user for user in subscribers if user["user_id"] == user_id), None)
-
-def add_subscriber(user):
+def save_subscriber(user: Update.effective_user):
     subscribers = load_subscribers()
-    if find_subscriber(subscribers, user["user_id"]) is None:
-        subscribers.append(user)
-        save_subscribers(subscribers)
-        logger.info(f"[NEW SUBSCRIBER] {user}")
+    user_ids = {sub['user_id'] for sub in subscribers}
+    if user.id not in user_ids:
+        subscriber = {
+            "user_id": user.id,
+            "username": user.username or "-",
+            "first_name": user.first_name or "-",
+            "last_name": user.last_name or "-",
+            "added_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        subscribers.append(subscriber)
+        with open(SUBSCRIBERS_FILE, 'w', encoding='utf-8') as f:
+            json.dump({"subscribers": subscribers}, f, ensure_ascii=False, indent=2)
+        logger.info(f"Добавлен новый подписчик: {subscriber}")
         return True
     return False
 
 def remove_subscriber(user_id):
     subscribers = load_subscribers()
-    new_subs = [user for user in subscribers if user["user_id"] != user_id]
-    if len(new_subs) < len(subscribers):
-        save_subscribers(new_subs)
-        logger.info(f"[UNSUBSCRIBED] user_id={user_id}")
-        return True
-    return False
+    new_subs = [sub for sub in subscribers if sub['user_id'] != user_id]
+    with open(SUBSCRIBERS_FILE, 'w', encoding='utf-8') as f:
+        json.dump({"subscribers": new_subs}, f, ensure_ascii=False, indent=2)
+    logger.info(f"Пользователь {user_id} удалён из подписчиков.")
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    user_obj = {
-        "user_id": user.id,
-        "username": user.username or "",
-        "first_name": user.first_name or "",
-        "last_name": user.last_name or "",
-        "joined": datetime.utcnow().isoformat()
-    }
-    if add_subscriber(user_obj):
-        await update.message.reply_text("Привет! Ты добавлен в рассылку новостей.")
-    else:
-        await update.message.reply_text("Ты уже подписан на рассылку.")
+    was_added = save_subscriber(user)
+    await update.message.reply_text(
+        "Привет! Ты добавлен в рассылку новостей." if was_added else "Ты уже в списке рассылки."
+    )
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Напиши любое сообщение, чтобы подписаться на рассылку.\nКоманда /stop — отписаться от рассылки.")
+    await update.message.reply_text(
+        "Напиши любое сообщение, чтобы подписаться на рассылку.\n"
+        "Доступные команды:\n"
+        "/start — подписаться\n"
+        "/stop — отписаться\n"
+        "/recommend_channel — предложить канал для рассылки\n"
+        "/channels — список каналов для агрегации\n"
+        "/status — узнать статус подписки"
+    )
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    user_obj = {
-        "user_id": user.id,
-        "username": user.username or "",
-        "first_name": user.first_name or "",
-        "last_name": user.last_name or "",
-        "joined": datetime.utcnow().isoformat()
-    }
-    if add_subscriber(user_obj):
+    was_added = save_subscriber(user)
+    if was_added:
         await update.message.reply_text("Спасибо за сообщение! Ты подписан на рассылку.")
     else:
-        await update.message.reply_text("Ты уже подписан на рассылку.")
+        await update.message.reply_text("Ты уже подписан.")
 
-async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    if remove_subscriber(user_id):
-        await update.message.reply_text("Вы успешно отписались от рассылки.")
+async def stop_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    remove_subscriber(user.id)
+    await update.message.reply_text("Ты отписан от рассылки. Возвращайся, если что!")
+
+# --- Recommend Channel Conversation ---
+
+async def recommend_channel_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "Пожалуйста, отправьте ссылку на канал или username (@example), который вы хотите предложить для рассылки. "
+        "Можно добавить комментарий."
+    )
+    return RECOMMEND_WAIT_INPUT
+
+async def recommend_channel_receive(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    text = update.message.text.strip()
+    rec_info = (
+        f"date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | "
+        f"user_id: {user.id} | username: @{user.username or '-'} | "
+        f"name: {user.first_name or '-'} {user.last_name or '-'} | "
+        f"recommend: {text}\n"
+    )
+    with open("channel_recommendations.txt", "a", encoding="utf-8") as f:
+        f.write(rec_info)
+    await update.message.reply_text("Спасибо! Ваша рекомендация отправлена администратору.")
+    return ConversationHandler.END
+
+async def recommend_channel_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Рекомендация отменена.")
+    return ConversationHandler.END
+
+# --- /channels: показать список каналов (читает channels.json) ---
+async def channels_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    try:
+        with open("channels.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+            channels = data.get("channels", [])
+        if not channels:
+            await update.message.reply_text("Список каналов пуст.")
+            return
+        msg = "Список каналов для агрегации:\n" + "\n".join(
+            f"@{c['username']}" if c.get('username') else c.get('title', '-') for c in channels
+        )
+        await update.message.reply_text(msg)
+    except Exception as e:
+        await update.message.reply_text(f"Не удалось получить список каналов: {e}")
+
+# --- /status: статус подписки ---
+async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    subscribers = load_subscribers()
+    is_subscribed = any(sub['user_id'] == user.id for sub in subscribers)
+    if is_subscribed:
+        await update.message.reply_text("Ты подписан на рассылку ✅")
     else:
-        await update.message.reply_text("Вы не были в списке подписчиков.")
+        await update.message.reply_text("Ты не подписан на рассылку.")
 
 def main():
+    import config  # импортирует telegram_bot_token из твоего конфига
+
     app = ApplicationBuilder().token(config.telegram_bot_token).build()
+
+    # Основные команды
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help_command))
-    app.add_handler(CommandHandler("stop", stop))
+    app.add_handler(CommandHandler("stop", stop_command))
+    app.add_handler(CommandHandler("channels", channels_command))
+    app.add_handler(CommandHandler("status", status_command))
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))
+
+    # Recommend channel
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler("recommend_channel", recommend_channel_start)],
+        states={
+            RECOMMEND_WAIT_INPUT: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, recommend_channel_receive)
+            ],
+        },
+        fallbacks=[CommandHandler("cancel", recommend_channel_cancel)],
+    )
+    app.add_handler(conv_handler)
+
     logger.info("Бот запущен, ожидает сообщений...")
     app.run_polling()
 
