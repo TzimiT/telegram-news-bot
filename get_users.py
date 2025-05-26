@@ -44,39 +44,42 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     was_added = save_subscriber(user)
     await update.message.reply_text(
-        "Привет! Ты добавлен в рассылку новостей." if was_added else "Ты уже в списке рассылки."
+        "🤖 Привет! Ты добавлен в рассылку агрегации новостей про AI." if was_added else "✅ Ты уже в списке рассылки агрегации новостей про AI."
     )
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Напиши любое сообщение, чтобы подписаться на рассылку.\n"
-        "Доступные команды:\n"
-        "/start — подписаться\n"
-        "/stop — отписаться\n"
-        "/recommend_channel — предложить канал для рассылки\n"
+        "🤖 **Бот агрегации новостей про AI**\n\n"
+        "📰 Напиши любое сообщение, чтобы подписаться на рассылку.\n\n"
+        "**Доступные команды:**\n"
+        "/start — подписаться на рассылку агрегации новостей про AI\n"
+        "/stop — отписаться от рассылки\n"
+        "/recommend_channel — предложить новый источник новостей/канал в телеге про AI\n"
         "/channels — список каналов для агрегации\n"
-        "/status — узнать статус подписки"
+        "/status — твой статус подписки\n"
+        "/help — показать это сообщение"
     )
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     was_added = save_subscriber(user)
     if was_added:
-        await update.message.reply_text("Спасибо за сообщение! Ты подписан на рассылку.")
+        await update.message.reply_text("🤖 Спасибо за сообщение! Ты добавлен в рассылку агрегации новостей про AI.")ение! Ты подписан на рассылку.")
     else:
         await update.message.reply_text("Ты уже подписан.")
 
 async def stop_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     remove_subscriber(user.id)
-    await update.message.reply_text("Ты отписан от рассылки. Возвращайся, если что!")
+    await update.message.reply_text("😢 Ты отписан от рассылки агрегации новостей про AI. Возвращайся, если что!")
 
 # --- Recommend Channel Conversation ---
 
 async def recommend_channel_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Пожалуйста, отправьте ссылку на канал или username (@example), который вы хотите предложить для рассылки. "
-        "Можно добавить комментарий."
+        "📢 Пожалуйста, отправьте ссылку на канал или username (@example) про AI, который вы хотите предложить для рассылки.\n\n"
+        "💡 Можно добавить комментарий, почему этот канал стоит добавить.\n\n"
+        "Отправьте /cancel для отмены."
     )
     return RECOMMEND_WAIT_INPUT
 
@@ -90,6 +93,19 @@ async def recommend_channel_receive(update: Update, context: ContextTypes.DEFAUL
     # Также сохраняем в текстовый файл для совместимости
     rec_info = (
         f"date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | "
+        f"user_id: {user.id} | username: @{user.username or '-'} | "
+        f"name: {user.first_name or '-'} {user.last_name or '-'} | "
+        f"recommend: {text}\n"
+    )
+    with open("channel_recommendations.txt", "a", encoding="utf-8") as f:
+        f.write(rec_info)
+    
+    await update.message.reply_text("Спасибо! Ваша рекомендация отправлена администратору.")
+    return ConversationHandler.END
+
+async def recommend_channel_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Рекомендация отменена.")
+    return ConversationHandler.END:%S')} | "
         f"user_id: {user.id} | username: @{user.username or '-'} | "
         f"name: {user.first_name or '-'} {user.last_name or '-'} | "
         f"recommend: {text}\n"
@@ -128,12 +144,16 @@ async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_info and user_info['is_active']:
         stats = db.get_user_stats()
         await update.message.reply_text(
-            f"✅ Ты подписан на рассылку\n"
+            f"✅ **Статус подписки:** Ты подписан на рассылку агрегации новостей про AI\n\n"
             f"📊 Всего активных подписчиков: {stats['active_users']}\n"
-            f"📅 Дата подписки: {user_info['added_at']}"
+            f"📅 Дата подписки: {user_info['added_at']}\n"
+            f"🕐 Последняя активность: {user_info['last_interaction']}"
         )
     else:
-        await update.message.reply_text("Ты не подписан на рассылку.")
+        await update.message.reply_text(
+            "❌ **Статус подписки:** Ты НЕ подписан на рассылку агрегации новостей про AI\n\n"
+            "Напиши /start чтобы подписаться!"
+        )
 
 # --- /admin_stats: статистика для админов ---
 async def admin_stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -171,6 +191,30 @@ def main():
 
     # Основные команды
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("help", help_command))
+    app.add_handler(CommandHandler("stop", stop_command))
+    app.add_handler(CommandHandler("status", status_command))
+    app.add_handler(CommandHandler("channels", channels_command))
+    app.add_handler(CommandHandler("admin_stats", admin_stats_command))
+    
+    # Conversation handler для рекомендации каналов
+    recommend_conv_handler = ConversationHandler(
+        entry_points=[CommandHandler("recommend_channel", recommend_channel_start)],
+        states={
+            RECOMMEND_WAIT_INPUT: [MessageHandler(filters.TEXT & ~filters.COMMAND, recommend_channel_receive)]
+        },
+        fallbacks=[CommandHandler("cancel", recommend_channel_cancel)]
+    )
+    app.add_handler(recommend_conv_handler)
+
+    # Обработчик всех остальных сообщений
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
+
+    print("🤖 Бот запущен...")
+    app.run_polling()
+
+if __name__ == "__main__":
+    main()andler("start", start))
     app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CommandHandler("stop", stop_command))
     app.add_handler(CommandHandler("status", status_command))
