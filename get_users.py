@@ -5,7 +5,7 @@ from telegram.ext import (
 )
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from database import db
 
 RECOMMEND_WAIT_INPUT = 1
@@ -16,6 +16,49 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
+def get_next_news_time():
+    """Получить время следующей рассылки новостей"""
+    now = datetime.now(timezone.utc)
+    next_run = now.replace(hour=9, minute=0, second=0, microsecond=0)
+
+    # Если время уже прошло сегодня, планируем на завтра
+    if now >= next_run:
+        next_run += timedelta(days=1)
+
+    time_diff = next_run - now
+    hours_left = int(time_diff.total_seconds() // 3600)
+    minutes_left = int((time_diff.total_seconds() % 3600) // 60)
+
+    return {
+        'datetime': next_run,
+        'hours': hours_left,
+        'minutes': minutes_left,
+        'formatted': next_run.strftime('%d.%m.%Y в %H:%M UTC')
+    }
+
+def get_channels_list():
+    """Получить список каналов для агрегации"""
+    try:
+        with open("channels.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+            channels = data.get("channels", [])
+
+        if not channels:
+            return "📭 Список каналов временно пуст"
+
+        channel_names = []
+        for channel in channels:
+            if channel.get('username'):
+                channel_names.append(f"@{channel['username']}")
+            elif channel.get('title'):
+                channel_names.append(channel['title'])
+
+        return "\n".join([f"• {name}" for name in channel_names[:10]]) + \
+               (f"\n• и ещё {len(channel_names) - 10} каналов..." if len(channel_names) > 10 else "")
+    except Exception as e:
+        logger.error(f"Ошибка загрузки каналов: {e}")
+        return "📭 Ошибка загрузки списка каналов"
 
 def save_subscriber(user: Update.effective_user):
     """Сохранить подписчика в базу данных"""
@@ -43,9 +86,18 @@ def remove_subscriber(user_id):
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     was_added = save_subscriber(user)
-    await update.message.reply_text(
-        "🤖 Привет! Ты добавлен в рассылку агрегации новостей про AI." if was_added else "✅ Ты уже в списке рассылки агрегации новостей про AI."
-    )
+
+    next_news = get_next_news_time()
+    channels_list = get_channels_list()
+
+    if was_added:
+        await update.message.reply_text(
+            "🤖 Привет! Ты добавлен в рассылку агрегации новостей про AI.\n\n"
+            f"Следующая рассылка: {next_news['formatted']}\n"
+            f"Каналы для агрегации:\n{channels_list}"
+        )
+    else:
+        await update.message.reply_text("✅ Ты уже в списке рассылки агрегации новостей про AI.")
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -64,8 +116,16 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     was_added = save_subscriber(user)
+
+    next_news = get_next_news_time()
+    channels_list = get_channels_list()
+
     if was_added:
-        await update.message.reply_text("🤖 Спасибо за сообщение! Ты добавлен в рассылку агрегации новостей про AI.")
+        await update.message.reply_text(
+            "🤖 Спасибо за сообщение! Ты добавлен в рассылку агрегации новостей про AI.\n\n"
+            f"Следующая рассылка: {next_news['formatted']}\n"
+            f"Каналы для агрегации:\n{channels_list}"
+        )
     else:
         await update.message.reply_text("Ты уже подписан на рассылку.")
 
