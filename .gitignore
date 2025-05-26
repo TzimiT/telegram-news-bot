@@ -42,6 +42,28 @@ subscribers_log.txt
 subscribers*.json
 !subscribers_example.json
 
+# Channel data files
+channels.json
+sport_channels.json
+
+# User and statistics data
+users.db
+*.db
+
+# Log files with user data
+users.log*
+*.log
+
+# Session files (contain authentication data)
+sessions/
+*.session*
+
+# Backup files that may contain sensitive data
+*.bak
+*.backup
+*_backup.*
+backup_*
+
 # Temporary files
 *.tmp
 *.bak
@@ -60,3 +82,27 @@ Thumbs.db
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Configuration files (may contain sensitive data)
+config.py
+*_config.py
+
+# Data exports and dumps
+*.csv
+*.xlsx
+*.dump
+data_export_*
+user_export_*
+
+# Cache and temporary data
+cache/
+tmp/
+temp/
+__pycache__/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+*~
+.*.swp
+.*.swo
