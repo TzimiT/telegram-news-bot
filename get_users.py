@@ -170,25 +170,4 @@ def main():
     app.run_polling()
 
 if __name__ == "__main__":
-    main()top_command))
-    app.add_handler(CommandHandler("channels", channels_command))
-    app.add_handler(CommandHandler("status", status_command))
-    app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))
-
-    # Recommend channel
-    conv_handler = ConversationHandler(
-        entry_points=[CommandHandler("recommend_channel", recommend_channel_start)],
-        states={
-            RECOMMEND_WAIT_INPUT: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, recommend_channel_receive)
-            ],
-        },
-        fallbacks=[CommandHandler("cancel", recommend_channel_cancel)],
-    )
-    app.add_handler(conv_handler)
-
-    logger.info("Бот запущен, ожидает сообщений...")
-    app.run_polling()
-
-if __name__ == '__main__':
     main()
