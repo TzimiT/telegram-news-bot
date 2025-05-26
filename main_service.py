@@ -6,7 +6,7 @@ import sys
 
 # Импортируем функции из существующих модулей
 from news_bot_part import run_continuous as news_service
-from get_users import start_bot as user_bot
+from get_users import main as user_bot
 from database import db
 
 # Настройка логирования
@@ -46,7 +46,10 @@ async def main():
     logger.info("👥 Запуск User Collection Bot...")
     def run_user_bot():
         try:
-            asyncio.set_event_loop(asyncio.new_event_loop())
+            # Создаем новый event loop для потока
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            # Запускаем main функцию из get_users
             user_bot()
         except Exception as e:
             logger.error(f"❌ Ошибка в User Bot: {e}")

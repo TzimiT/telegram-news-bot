@@ -98,7 +98,7 @@ async def send_news(summary):
             error_msg = str(e)
             logger.error(f"[FAILED] Не удалось отправить сообщение пользователю {user_id}: {error_msg}")
             failed_subscribers.append(user_id)
-            
+
             # Деактивируем пользователя только при определенных ошибках
             if "Chat not found" in error_msg or "Forbidden: bot was blocked" in error_msg:
                 db.remove_user(user_id)
@@ -140,11 +140,11 @@ async def main():
         # Шаг 1: Получить и сохранить полную инфу о каналах из папки
         print(f"[LOG] Проверяю обновления каналов в папке '{FOLDER_NAME}'...")
         await get_channels_fullinfo_from_folder(client, FOLDER_NAME)
-        
+
         # Шаг 2: Загрузить полную инфу о каналах для рассылки
         channels = load_channels_from_json()
         print(f"[LOG] Каналы для агрегации ({len(channels)} шт.): {[ch.get('username','?') for ch in channels]}")
-        
+
         if not channels:
             print(f"[ERROR] Не найдено каналов в папке '{FOLDER_NAME}'. Проверьте настройки папки в Telegram.")
             return
@@ -161,48 +161,46 @@ async def main():
         await send_news(summary)
 
 async def run_continuous():
-    """Непрерывная работа с расписанием"""
-    
+    """Непрерывная работа службы новостей с расписанием"""
     logger.info("🔄 Служба агрегации новостей запущена")
     logger.info("📅 Рассылка запланирована на 09:00 UTC каждый день")
-    
+
     while True:
         try:
-            # Получаем текущее время UTC
+            # Вычисляем время до следующей рассылки (09:00 UTC)
             now = datetime.now(timezone.utc)
-            target_time = now.replace(hour=9, minute=0, second=0, microsecond=0)
-            
+            next_run = now.replace(hour=9, minute=0, second=0, microsecond=0)
+
             # Если время уже прошло сегодня, планируем на завтра
-            if now >= target_time:
-                target_time += timedelta(days=1)
-            
-            # Вычисляем время до следующего запуска
-            sleep_seconds = (target_time - now).total_seconds()
-            
-            logger.info(f"⏰ Следующая рассылка: {target_time.strftime('%Y-%m-%d %H:%M:%S UTC')}")
-            logger.info(f"⏱️ Ожидание: {sleep_seconds/3600:.1f} часов")
-            
-            # Спим до времени рассылки
-            await asyncio.sleep(sleep_seconds)
-            
-            # Выполняем рассылку
-            logger.info("🚀 Запуск рассылки новостей...")
+            if now >= next_run:
+                next_run += timedelta(days=1)
+
+            wait_time = (next_run - now).total_seconds()
+            wait_hours = wait_time / 3600
+
+            logger.info(f"⏰ Следующая рассылка: {next_run}")
+            logger.info(f"⏱️ Ожидание: {wait_hours:.1f} часов")
+
+            # Ждем до назначенного времени
+            await asyncio.sleep(wait_time)
+
+            # Запускаем рассылку
+            logger.info("📰 Время рассылки! Запускаю агрегацию новостей...")
             await main()
-            
-        except KeyboardInterrupt:
-            logger.info("⏹️ Служба остановлена пользователем")
-            break
+
         except Exception as e:
-            logger.error(f"❌ Ошибка в основном цикле: {e}")
-            logger.exception("Полная трассировка ошибки:")
-            await asyncio.sleep(300)  # ждем 5 минут при ошибке
+            logger.error(f"❌ Ошибка в службе новостей: {e}")
+            # Ждем 1 час перед повторной попыткой
+            await asyncio.sleep(3600)
 
 if __name__ == "__main__":
-    import sys
-    
-    if len(sys.argv) > 1 and sys.argv[1] == "--once":
-        # Запуск рассылки один раз (для тестирования)
+    import argparse
+
+    parser = argparse.ArgumentParser(description='News Bot')
+    parser.add_argument('--once', action='store_true', help='Запустить один раз вместо непрерывной работы')
+    args = parser.parse_args()
+
+    if args.once:
         asyncio.run(main())
     else:
-        # Постоянная работа с расписанием
         asyncio.run(run_continuous())
