@@ -170,3 +170,13 @@
 2025-05-26 19:11:05,408 - INFO - [INFO] Рассылка завершена: успешно=1, неудачно=0
 2025-05-26 19:11:05,410 - INFO - Disconnecting from 149.154.167.51:443/TcpFull...
 2025-05-26 19:11:05,420 - INFO - Disconnection from 149.154.167.51:443/TcpFull complete!
+2025-05-26 19:32:41,603 - INFO - Connecting to 149.154.167.51:443/TcpFull...
+2025-05-26 19:32:41,720 - INFO - Connection to 149.154.167.51:443/TcpFull complete!
+2025-05-26 19:32:42,706 - INFO - User is already connected!
+2025-05-26 19:33:12,810 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-26 19:33:12,828 - INFO - [INFO] Начинаю рассылку для 1 активных подписчиков
+2025-05-26 19:33:13,421 - INFO - HTTP Request: POST https://api.telegram.org/bot7932039953:AAFq5UHiAOpcWcHuQI9kkl95GYwSPqYrY7A/sendMessage "HTTP/1.1 200 OK"
+2025-05-26 19:33:13,423 - INFO - [SUCCESS] Сообщение отправлено пользователю 94598500, message_id=17
+2025-05-26 19:33:13,460 - INFO - [INFO] Рассылка завершена: успешно=1, неудачно=0
+2025-05-26 19:33:13,462 - INFO - Disconnecting from 149.154.167.51:443/TcpFull...
+2025-05-26 19:33:13,479 - INFO - Disconnection from 149.154.167.51:443/TcpFull complete!
