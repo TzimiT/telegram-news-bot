@@ -97,21 +97,34 @@ def show_statistics():
         print(f"❌ Ошибка получения статистики: {e}")
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        command = sys.argv[1].lower()
-        
-        if command == "recent":
-            limit = 10 if len(sys.argv) < 3 else int(sys.argv[2])
-            show_recent_recommendations(limit)
-        elif command == "stats":
-            show_statistics()
-        elif command == "help":
-            print("📋 Использование:")
-            print("  python show_recommendations.py           - все рекомендации")
-            print("  python show_recommendations.py recent    - последние 10")
-            print("  python show_recommendations.py recent 5  - последние 5")
-            print("  python show_recommendations.py stats     - статистика")
+    try:
+        if len(sys.argv) > 1:
+            command = sys.argv[1].lower()
+            
+            if command == "recent":
+                limit = 10 if len(sys.argv) < 3 else int(sys.argv[2])
+                show_recent_recommendations(limit)
+            elif command == "stats":
+                show_statistics()
+            elif command == "help":
+                print("📋 Использование:")
+                print("  python show_recommendations.py           - все рекомендации")
+                print("  python show_recommendations.py recent    - последние 10")
+                print("  python show_recommendations.py recent 5  - последние 5")
+                print("  python show_recommendations.py stats     - статистика")
+            else:
+                print("❌ Неизвестная команда. Используйте 'help' для справки")
         else:
-            print("❌ Неизвестная команда. Используйте 'help' для справки")
-    else:
-        show_recommendations()
+            show_recommendations()
+        
+        # Пауза для чтения результатов
+        print("\n" + "="*60)
+        print("💡 Нажмите Enter для завершения или Ctrl+C для выхода...")
+        input()
+        
+    except KeyboardInterrupt:
+        print("\n👋 Выход из программы")
+    except Exception as e:
+        print(f"\n❌ Ошибка: {e}")
+        print("\n💡 Нажмите Enter для завершения...")
+        input()
