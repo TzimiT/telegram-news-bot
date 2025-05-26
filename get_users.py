@@ -6,8 +6,8 @@ from telegram.ext import (
 import json
 import os
 from datetime import datetime
+from database import db
 
-SUBSCRIBERS_FILE = "subscribers.json"
 RECOMMEND_WAIT_INPUT = 1
 
 logging.basicConfig(
@@ -17,41 +17,27 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-def load_subscribers():
-    if not os.path.exists(SUBSCRIBERS_FILE):
-        logger.warning("[WARN] Файл с подписчиками не найден, список пуст")
-        return []
-    try:
-        with open(SUBSCRIBERS_FILE, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            return data.get('subscribers', [])
-    except Exception as e:
-        logger.error(f"[ERROR] Ошибка чтения {SUBSCRIBERS_FILE}: {e}")
-        return []
-
 def save_subscriber(user: Update.effective_user):
-    subscribers = load_subscribers()
-    user_ids = {sub['user_id'] for sub in subscribers}
-    if user.id not in user_ids:
-        subscriber = {
-            "user_id": user.id,
-            "username": user.username or "-",
-            "first_name": user.first_name or "-",
-            "last_name": user.last_name or "-",
-            "added_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        }
-        subscribers.append(subscriber)
-        with open(SUBSCRIBERS_FILE, 'w', encoding='utf-8') as f:
-            json.dump({"subscribers": subscribers}, f, ensure_ascii=False, indent=2)
-        logger.info(f"Добавлен новый подписчик: {subscriber}")
-        return True
+    """Сохранить подписчика в базу данных"""
+    existing_user = db.get_user_info(user.id)
+    if not existing_user or not existing_user['is_active']:
+        success = db.add_user(
+            user.id,
+            user.username,
+            user.first_name,
+            user.last_name
+        )
+        if success:
+            logger.info(f"Добавлен новый подписчик: {user.id} (@{user.username})")
+            return True
+    else:
+        # Обновляем время взаимодействия
+        db.update_user_interaction(user.id)
     return False
 
 def remove_subscriber(user_id):
-    subscribers = load_subscribers()
-    new_subs = [sub for sub in subscribers if sub['user_id'] != user_id]
-    with open(SUBSCRIBERS_FILE, 'w', encoding='utf-8') as f:
-        json.dump({"subscribers": new_subs}, f, ensure_ascii=False, indent=2)
+    """Удалить подписчика из базы данных"""
+    db.remove_user(user_id)
     logger.info(f"Пользователь {user_id} удалён из подписчиков.")
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -97,6 +83,11 @@ async def recommend_channel_start(update: Update, context: ContextTypes.DEFAULT_
 async def recommend_channel_receive(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     text = update.message.text.strip()
+    
+    # Сохраняем в базу данных
+    db.add_channel_recommendation(user.id, text)
+    
+    # Также сохраняем в текстовый файл для совместимости
     rec_info = (
         f"date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | "
         f"user_id: {user.id} | username: @{user.username or '-'} | "
@@ -105,6 +96,7 @@ async def recommend_channel_receive(update: Update, context: ContextTypes.DEFAUL
     )
     with open("channel_recommendations.txt", "a", encoding="utf-8") as f:
         f.write(rec_info)
+    
     await update.message.reply_text("Спасибо! Ваша рекомендация отправлена администратору.")
     return ConversationHandler.END
 
@@ -131,12 +123,46 @@ async def channels_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # --- /status: статус подписки ---
 async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    subscribers = load_subscribers()
-    is_subscribed = any(sub['user_id'] == user.id for sub in subscribers)
-    if is_subscribed:
-        await update.message.reply_text("Ты подписан на рассылку ✅")
+    user_info = db.get_user_info(user.id)
+    
+    if user_info and user_info['is_active']:
+        stats = db.get_user_stats()
+        await update.message.reply_text(
+            f"✅ Ты подписан на рассылку\n"
+            f"📊 Всего активных подписчиков: {stats['active_users']}\n"
+            f"📅 Дата подписки: {user_info['added_at']}"
+        )
     else:
         await update.message.reply_text("Ты не подписан на рассылку.")
+
+# --- /admin_stats: статистика для админов ---
+async def admin_stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    
+    # Простая проверка на админа (можете добавить список админов в config)
+    admin_ids = [94598500]  # Замените на ваши ID
+    
+    if user.id not in admin_ids:
+        await update.message.reply_text("❌ У вас нет прав для просмотра статистики.")
+        return
+    
+    stats = db.get_user_stats()
+    
+    message = f"""
+📊 **Статистика пользователей базы данных:**
+
+👥 Активных пользователей: {stats['active_users']}
+📋 Всего пользователей: {stats['total_users']}
+
+🕐 **Последние активные пользователи:**
+"""
+    
+    for user_data in stats['recent_users']:
+        username, first_name, last_name, last_interaction = user_data
+        name = f"{first_name} {last_name}".strip()
+        message += f"• @{username} ({name}) - {last_interaction}\n"
+    
+    await update.message.reply_text(message)
 
 def main():
     import config  # импортирует telegram_bot_token из твоего конфига
@@ -159,6 +185,9 @@ def main():
         fallbacks=[CommandHandler("cancel", recommend_channel_cancel)]
     )
     app.add_handler(recommend_conv_handler)
+
+    # Команда для администраторов
+    app.add_handler(CommandHandler("admin_stats", admin_stats_command))
 
     # Обработчик всех остальных сообщений
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))

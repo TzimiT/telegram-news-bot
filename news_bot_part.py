@@ -8,6 +8,7 @@ import json
 import os
 import logging
 from get_channels import get_channels_fullinfo_from_folder, load_channels_from_json
+from database import db
 
 # Настройка логирования
 logging.basicConfig(
@@ -20,45 +21,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-SUBSCRIBERS_FILE = "subscribers.json"
 
-def load_subscribers():
-    if not os.path.exists(SUBSCRIBERS_FILE):
-        logger.warning("[WARN] Файл с подписчиками не найден, создаю новый")
-        # Создаем пустой файл с правильной структурой
-        with open(SUBSCRIBERS_FILE, 'w', encoding='utf-8') as f:
-            json.dump({"subscribers": []}, f, ensure_ascii=False, indent=2)
-        return []
-    try:
-        with open(SUBSCRIBERS_FILE, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            subscribers = data.get('subscribers', [])
-            logger.info(f"[INFO] Загружено {len(subscribers)} подписчиков")
-            return [item['user_id'] for item in subscribers]
     except Exception as e:
         logger.error(f"[ERROR] Ошибка чтения {SUBSCRIBERS_FILE}: {e}")
         return []
 
-def check_and_migrate_old_subscribers():
-    """Проверяет старый формат подписчиков и мигрирует в новый"""
-    old_file = "subscribers_old.json"
-    if os.path.exists(old_file):
-        try:
-            with open(old_file, 'r', encoding='utf-8') as f:
-                old_data = json.load(f)
-
-            if "subscribers" in old_data and isinstance(old_data["subscribers"], list):
-                # Проверяем, содержит ли старые данные просто ID или уже структурированные данные
-                if old_data["subscribers"] and isinstance(old_data["subscribers"][0], int):
-                    logger.info("[INFO] Найден старый формат подписчиков, мигрирую...")
-                    new_subscribers = []
-                    for user_id in old_data["subscribers"]:
-                        new_subscribers.append({
-                            "user_id": user_id,
-                            "username": "-",
-                            "first_name": "-", 
-                            "last_name": "-",
-                            "added_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+time("%Y-%m-%d %H:%M:%S"),
                             "migrated": True
                         })
 
@@ -112,16 +80,16 @@ async def get_news(client, channels):
     return all_news
 
 async def send_news(summary):
-    # Проверяем и мигрируем старых подписчиков
-    check_and_migrate_old_subscribers()
+    # Мигрируем старые данные в базу данных, если необходимо
+    db.migrate_from_json()
 
-    subscribers = load_subscribers()
+    subscribers = db.get_active_users()
     if not subscribers:
-        logger.warning("[WARN] Нет подписчиков для рассылки.")
+        logger.warning("[WARN] Нет активных подписчиков для рассылки.")
         return
 
     bot = Bot(token=telegram_bot_token)
-    active_subscribers = []
+    successful_sends = 0
     failed_subscribers = []
 
     logger.info(f"[INFO] Начинаю рассылку для {len(subscribers)} подписчиков")
@@ -130,36 +98,25 @@ async def send_news(summary):
         try:
             result = await bot.send_message(chat_id=user_id, text=summary)
             logger.info(f"[SUCCESS] Сообщение отправлено пользователю {user_id}, message_id={result.message_id}")
-            active_subscribers.append(user_id)
+            # Обновляем статистику взаимодействия
+            db.update_user_interaction(user_id)
+            successful_sends += 1
         except Exception as e:
             logger.error(f"[FAILED] Не удалось отправить сообщение пользователю {user_id}: {e}")
             failed_subscribers.append(user_id)
+            # Деактивируем пользователя в случае ошибки
+            db.remove_user(user_id)
 
-    # Обновляем файл подписчиков, удаляя неактивных
-    try:
-        with open(SUBSCRIBERS_FILE, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+    logger.info(f"[INFO] Рассылка завершена: успешно={successful_sends}, неудачно={len(failed_subscribers)}")
 
-        original_count = len(data.get('subscribers', []))
-        new_subs = [sub for sub in data.get('subscribers',[]) if sub['user_id'] in active_subscribers]
-        removed_count = original_count - len(new_subs)
-
-        with open(SUBSCRIBERS_FILE, 'w', encoding='utf-8') as f:
-            json.dump({"subscribers": new_subs}, f, ensure_ascii=False, indent=2)
-
-        logger.info(f"[INFO] Обновлен список подписчиков: активных={len(active_subscribers)}, удалено={removed_count}")
-
-        if failed_subscribers:
-            logger.warning(f"[INFO] Неактивные подписчики удалены: {failed_subscribers}")
-
-    except Exception as e:
-        logger.error(f"[ERROR] Ошибка обновления активных подписчиков: {e}")
+    if failed_subscribers:
+        logger.warning(f"[INFO] Деактивированы неактивные подписчики: {failed_subscribers}")
 
 SESSION_FILE = 'sessions/news_session'
 
 async def main():
-    # Проверяем и мигрируем старых подписчиков перед началом работы
-    check_and_migrate_old_subscribers()
+    # Инициализируем базу данных и мигрируем старые данные
+    db.migrate_from_json()
 
     # Проверяем наличие файла сессии
     if not os.path.exists(f"{SESSION_FILE}.session"):
