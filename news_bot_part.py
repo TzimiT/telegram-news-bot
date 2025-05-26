@@ -155,11 +155,13 @@ async def send_news(summary):
     except Exception as e:
         logger.error(f"[ERROR] Ошибка обновления активных подписчиков: {e}")
 
+SESSION_FILE = 'news_session'
+
 async def main():
     # Проверяем и мигрируем старых подписчиков перед началом работы
     check_and_migrate_old_subscribers()
     
-    async with TelegramClient('news_session.session', api_id, api_hash) as client:
+    async with TelegramClient(SESSION_FILE, api_id, api_hash) as client:
         # Шаг 1: Получить и сохранить полную инфу о каналах из папки
         await get_channels_fullinfo_from_folder(client, FOLDER_NAME)
         # Шаг 2: Загрузить полную инфу о каналах для рассылки</old_str>

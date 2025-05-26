@@ -6,6 +6,18 @@ import os
 import asyncio
 
 CHANNELS_FILE = "channels.json"
+SESSION_FILE = 'news_session'
+
+async def main():
+    """Основная функция для получения каналов"""
+    async with TelegramClient(SESSION_FILE, api_id, api_hash) as client:
+        channels = await get_channels_fullinfo_from_folder(client, "GPT")
+        print(f"Найдено каналов: {len(channels)}")
+        for ch in channels:
+            print(f"- {ch.get('title', '?')} (@{ch.get('username', '?')})")
+
+if __name__ == "__main__":
+    asyncio.run(main())
 
 def serialize_for_json(obj):
     """

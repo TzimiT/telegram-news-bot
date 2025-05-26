@@ -8,11 +8,15 @@ subscribers.json
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Файлы Telethon-сессий (содержат авторизационные данные)
 *.session
 *.session-journal
+news_session.session*
 
-# Файлы Telethon-сессий (только для локальной машины)
-*.session
+# Логи
+*.log
+*.log.*
 
 # Виртуальные окружения (если используешь)
 venv/
