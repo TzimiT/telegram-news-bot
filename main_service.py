@@ -5,6 +5,7 @@ import sys
 
 # Импортируем функции из существующих модулей
 from news_bot_part import run_continuous as news_service
+from sport_news_bot import run_sport_continuous as sport_news_service
 from get_users import main as user_bot
 from database import db
 
@@ -40,6 +41,11 @@ async def main():
     logger.info("📰 Запуск News Aggregator Service...")
     news_task = asyncio.create_task(news_service())
     tasks.append(news_task)
+    
+    # 1.5. Запускаем сервис спортивных новостей для @avdovin
+    logger.info("🏆 Запуск Sport News Service для @avdovin...")
+    sport_news_task = asyncio.create_task(sport_news_service())
+    tasks.append(sport_news_task)
 
     # 2. Запускаем пользовательский бот как асинхронную задачу
     logger.info("👥 Запуск User Collection Bot...")
@@ -70,6 +76,7 @@ async def main():
     logger.info("✅ Все сервисы запущены и работают 24/7")
     logger.info("📋 Активные сервисы:")
     logger.info("   - 📰 News Aggregator (рассылка в 09:00 UTC)")
+    logger.info("   - 🏆 Sport News Aggregator для @avdovin (рассылка в 10:00 UTC)")
     logger.info("   - 👥 User Collection Bot (обработка команд)")
     logger.info("   - 🗄️ PostgreSQL Database")
 

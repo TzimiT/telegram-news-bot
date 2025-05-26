@@ -50,85 +50,81 @@ def serialize_for_json(obj):
     else:
         return str(obj)
 
-async def get_channels_fullinfo_from_folder(client, folder_name):
-    filters_resp = await client(GetDialogFiltersRequest())
-    filters = None
-    for attr in ['results', 'filters', 'dialog_filters']:
-        if hasattr(filters_resp, attr):
-            filters = getattr(filters_resp, attr)
-            break
-    if filters is None:
-        raise Exception(f"Не найдено ни одно поле с фильтрами в {dir(filters_resp)}")
+async def get_channels_fullinfo_from_folder(client, folder_name, output_file=None):
+    """Получает полную информацию о каналах из указанной папки Telegram"""
+    if output_file is None:
+        output_file = CHANNELS_FILE
 
-    result_channels = []
-    for f in filters:
-        title = ""
-        if hasattr(f, "title"):
-            if hasattr(f.title, "text"):
-                title = f.title.text
-            else:
-                title = f.title
-        elif hasattr(f, "text") and hasattr(f.text, "text"):
-            title = f.text.text
+    print(f"[LOG] Получаем информацию о каналах из папки '{folder_name}' -> {output_file}...")
 
-        if title == folder_name:
-            if hasattr(f, 'include_peers') and f.include_peers:
-                for peer in f.include_peers:
-                    try:
-                        entity = await client.get_entity(peer)
-                        # Сохраняем ВСЕ данные с сериализацией!
-                        info = entity.to_dict() if hasattr(entity, "to_dict") else {}
-                        info = serialize_for_json(info)
-                        if hasattr(entity, "username") and entity.username:
-                            info["username"] = entity.username
-                        if hasattr(entity, "id"):
-                            info["id"] = entity.id
-                        if hasattr(entity, "title"):
-                            info["title"] = entity.title
-                        result_channels.append(info)
-                    except Exception as e:
-                        print(f"[WARN] Не смог получить инфу для peer {peer}: {e}")
-            break
+    # Получаем все папки (фильтры диалогов)
+    try:
+        filters = await client(GetDialogFiltersRequest())
+        target_filter = None
 
-    # Читаем старый список каналов для сравнения
-    old_channels = []
-    if os.path.exists(CHANNELS_FILE):
-        try:
-            with open(CHANNELS_FILE, "r", encoding="utf-8") as f:
-                old_data = json.load(f)
-                old_channels = old_data.get("channels", [])
-        except:
-            pass
-    
-    # Сохраняем новый список
-    with open(CHANNELS_FILE, "w", encoding="utf-8") as f:
-        json.dump({"channels": result_channels}, f, ensure_ascii=False, indent=2)
+        for filter_obj in filters.filters:
+            if hasattr(filter_obj, 'title') and filter_obj.title == folder_name:
+                target_filter = filter_obj
+                break
 
-    # Анализируем изменения
-    old_usernames = {ch.get('username') for ch in old_channels if ch.get('username')}
-    new_usernames = {ch.get('username') for ch in result_channels if ch.get('username')}
-    
-    added = new_usernames - old_usernames
-    removed = old_usernames - new_usernames
-    
-    if added:
-        print(f"[LOG] ✅ Добавлены новые каналы: {list(added)}")
-    if removed:
-        print(f"[LOG] ❌ Удалены каналы: {list(removed)}")
-    if not added and not removed and old_channels:
-        print(f"[LOG] 📋 Список каналов не изменился ({len(result_channels)} шт.)")
-    elif not old_channels:
-        print(f"[LOG] 🆕 Создан новый список каналов ({len(result_channels)} шт.)")
+        if not target_filter:
+            print(f"[ERROR] Папка '{folder_name}' не найдена!")
+            return []
 
-    if not result_channels:
-        print(f"[WARN] Папка '{folder_name}' не найдена или пуста")
+        print(f"[LOG] Найдена папка '{folder_name}' с {len(target_filter.include_peers)} каналами")
 
-    return result_channels
+        # Получаем полную информацию о каждом канале
+        channels_info = []
+        for peer in target_filter.include_peers:
+            try:
+                # Получаем полную информацию о канале
+                entity = await client.get_entity(peer)
 
-def load_channels_from_json():
-    if not os.path.exists(CHANNELS_FILE):
-        print(f"[WARN] Файл {CHANNELS_FILE} не найден.")
+                # Конвертируем в JSON-совместимый формат
+                channel_data = {
+                    "id": entity.id,
+                    "title": getattr(entity, 'title', None),
+                    "username": getattr(entity, 'username', None),
+                    "description": getattr(entity, 'about', None),
+                    "participants_count": getattr(entity, 'participants_count', None),
+                    "date": str(getattr(entity, 'date', None)),
+                    "verified": getattr(entity, 'verified', False),
+                    "scam": getattr(entity, 'scam', False),
+                    "fake": getattr(entity, 'fake', False),
+                    "access_hash": getattr(entity, 'access_hash', None),
+                }
+
+                channels_info.append(channel_data)
+                print(f"[DEBUG] Добавлен канал: @{channel_data.get('username', 'unknown')} - {channel_data.get('title', 'No title')}")
+
+            except Exception as e:
+                print(f"[WARN] Не удалось получить информацию о канале {peer}: {e}")
+                continue
+
+        # Сохраняем в JSON файл
+        data = {"channels": channels_info}
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
+        print(f"[LOG] ✅ Сохранено {len(channels_info)} каналов в {output_file}")
+        return channels_info
+
+    except Exception as e:
+        print(f"[ERROR] Ошибка получения каналов из папки: {e}")
         return []
-    with open(CHANNELS_FILE, "r", encoding="utf-8") as f:
-        data = json.load(f)
-        return data.get("channels", [])
+
+def load_channels_from_json(filename=None):
+    """Загружает каналы из JSON файла"""
+    if filename is None:
+        filename = CHANNELS_FILE
+
+    try:
+        with open(filename, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return data.get('channels', [])
+    except FileNotFoundError:
+        print(f"[WARN] Файл {filename} не найден")
+        return []
+    except Exception as e:
+        print(f"[ERROR] Ошибка чтения {filename}: {e}")
+        return []
