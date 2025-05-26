@@ -32,7 +32,7 @@ def summarize_news(news_list):
     text = "\n\n".join(news_list)
     client_ai = openai.OpenAI(api_key=openai_api_key)
     response = client_ai.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-4.1-mini",
         messages=[
             {"role": "system", "content": "Сделай краткую сводку новостей за сутки по этим выдержкам, обязательно указывай источники."},
             {"role": "user", "content": text}
