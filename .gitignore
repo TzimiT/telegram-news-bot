@@ -6,8 +6,10 @@ subscribers.json
 
 # Python cache
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
+*$py.class
+*.session
+*.session-journal
 
 # Файлы Telethon-сессий (только для локальной машины)
 *.session

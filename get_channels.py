@@ -1,7 +1,9 @@
+from telethon import TelegramClient
 from telethon.tl.functions.messages import GetDialogFiltersRequest
 from config import api_id, api_hash
 import json
 import os
+import asyncio
 
 CHANNELS_FILE = "channels.json"
 
