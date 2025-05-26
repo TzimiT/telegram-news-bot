@@ -10,23 +10,27 @@ DATABASE_FILE = "users.db"
 class UserDatabase:
     def __init__(self):
         self.db_file = DATABASE_FILE
+        # Регистрируем адаптеры для datetime
+        sqlite3.register_adapter(datetime, lambda dt: dt.isoformat())
+        sqlite3.register_converter("timestamp", lambda b: datetime.fromisoformat(b.decode('utf-8')))
         self.init_database()
     
     def init_database(self):
         """Инициализация базы данных и создание таблиц"""
-        conn = sqlite3.connect(self.db_file)
+        conn = sqlite3.connect(self.db_file, detect_types=sqlite3.PARSE_DECLTYPES)
+        conn.execute('PRAGMA encoding = "UTF-8"')
         cursor = conn.cursor()
         
         # Таблица пользователей
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 user_id INTEGER PRIMARY KEY,
-                username TEXT,
-                first_name TEXT,
-                last_name TEXT,
-                added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                username TEXT COLLATE NOCASE,
+                first_name TEXT COLLATE NOCASE,
+                last_name TEXT COLLATE NOCASE,
+                added_at timestamp DEFAULT CURRENT_TIMESTAMP,
                 is_active BOOLEAN DEFAULT 1,
-                last_interaction TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                last_interaction timestamp DEFAULT CURRENT_TIMESTAMP
             )
         ''')
         
@@ -35,7 +39,7 @@ class UserDatabase:
             CREATE TABLE IF NOT EXISTS user_stats (
                 user_id INTEGER,
                 messages_received INTEGER DEFAULT 0,
-                last_message_date TIMESTAMP,
+                last_message_date timestamp,
                 FOREIGN KEY (user_id) REFERENCES users (user_id)
             )
         ''')
@@ -45,8 +49,8 @@ class UserDatabase:
             CREATE TABLE IF NOT EXISTS channel_recommendations (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER,
-                recommendation TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                recommendation TEXT COLLATE NOCASE,
+                created_at timestamp DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users (user_id)
             )
         ''')
@@ -55,9 +59,16 @@ class UserDatabase:
         conn.close()
         print("✅ База данных инициализирована")
     
+    def _get_connection(self):
+        """Получить подключение к базе с правильной кодировкой"""
+        conn = sqlite3.connect(self.db_file, detect_types=sqlite3.PARSE_DECLTYPES)
+        conn.execute('PRAGMA encoding = "UTF-8"')
+        conn.row_factory = sqlite3.Row
+        return conn
+
     def add_user(self, user_id: int, username: str = None, first_name: str = None, last_name: str = None) -> bool:
         """Добавить пользователя в базу"""
-        conn = sqlite3.connect(self.db_file)
+        conn = self._get_connection()
         cursor = conn.cursor()
         
         try:
@@ -84,7 +95,7 @@ class UserDatabase:
     
     def remove_user(self, user_id: int):
         """Удалить пользователя (деактивировать)"""
-        conn = sqlite3.connect(self.db_file)
+        conn = self._get_connection()
         cursor = conn.cursor()
         
         cursor.execute('UPDATE users SET is_active = 0 WHERE user_id = ?', (user_id,))
@@ -93,7 +104,7 @@ class UserDatabase:
     
     def get_active_users(self) -> List[int]:
         """Получить список активных пользователей"""
-        conn = sqlite3.connect(self.db_file)
+        conn = self._get_connection()
         cursor = conn.cursor()
         
         cursor.execute('SELECT user_id FROM users WHERE is_active = 1')
@@ -104,7 +115,7 @@ class UserDatabase:
     
     def get_user_info(self, user_id: int) -> Optional[Dict]:
         """Получить информацию о пользователе"""
-        conn = sqlite3.connect(self.db_file)
+        conn = self._get_connection()
         cursor = conn.cursor()
         
         cursor.execute('''
@@ -129,7 +140,7 @@ class UserDatabase:
     
     def update_user_interaction(self, user_id: int):
         """Обновить время последнего взаимодействия"""
-        conn = sqlite3.connect(self.db_file)
+        conn = self._get_connection()
         cursor = conn.cursor()
         
         cursor.execute('''
@@ -146,7 +157,7 @@ class UserDatabase:
     
     def add_channel_recommendation(self, user_id: int, recommendation: str):
         """Добавить рекомендацию канала"""
-        conn = sqlite3.connect(self.db_file)
+        conn = self._get_connection()
         cursor = conn.cursor()
         
         cursor.execute('''
@@ -159,7 +170,7 @@ class UserDatabase:
     
     def get_user_stats(self) -> Dict:
         """Получить общую статистику пользователей"""
-        conn = sqlite3.connect(self.db_file)
+        conn = self._get_connection()
         cursor = conn.cursor()
         
         # Общее количество пользователей
