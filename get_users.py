@@ -85,6 +85,7 @@ def save_subscriber(user: Update.effective_user):
                f"verified={user_data['is_verified']}")
     
     existing_user = db.get_user_info(user.id)
+    logger.info(f"save_subscriber: existing_user={existing_user}")
     
     # Если пользователь новый или был отписан - подписываем
     if not existing_user or not existing_user.get('is_active', False):
@@ -217,9 +218,14 @@ async def channels_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     user_info = db.get_user_info(user.id)
+    
+    # Логируем для отладки
+    logger.info(f"Проверка статуса пользователя {user.id}: user_info={user_info}")
+    if user_info:
+        logger.info(f"is_active = {user_info.get('is_active')}, тип: {type(user_info.get('is_active'))}")
 
     # Более строгая проверка: пользователь должен существовать И быть активным
-    if user_info and user_info.get('is_active', False) is True:
+    if user_info and user_info.get('is_active') == True:
         stats = db.get_user_stats()
         
         # Формируем расширенную информацию о пользователе

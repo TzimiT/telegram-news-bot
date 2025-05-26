@@ -216,7 +216,7 @@ class PostgresDatabase:
                     is_restricted = EXCLUDED.is_restricted,
                     is_scam = EXCLUDED.is_scam,
                     is_fake = EXCLUDED.is_fake,
-                    is_active = true,
+                    is_active = TRUE,
                     last_interaction = CURRENT_TIMESTAMP,
                     user_data = EXCLUDED.user_data
             ''', (
