@@ -64,9 +64,9 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     was_added = save_subscriber(user)
     if was_added:
-        await update.message.reply_text("🤖 Спасибо за сообщение! Ты добавлен в рассылку агрегации новостей про AI.")ение! Ты подписан на рассылку.")
+        await update.message.reply_text("🤖 Спасибо за сообщение! Ты добавлен в рассылку агрегации новостей про AI.")
     else:
-        await update.message.reply_text("Ты уже подписан.")
+        await update.message.reply_text("Ты уже подписан на рассылку.")
 
 async def stop_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
