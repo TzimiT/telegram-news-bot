@@ -1,5 +1,4 @@
 import asyncio
-import threading
 import logging
 from datetime import datetime
 import sys
@@ -42,21 +41,28 @@ async def main():
     news_task = asyncio.create_task(news_service())
     tasks.append(news_task)
 
-    # 2. Запускаем пользовательский бот в отдельном потоке с правильным event loop
+    # 2. Запускаем пользовательский бот как асинхронную задачу
     logger.info("👥 Запуск User Collection Bot...")
-    def run_user_bot():
+    async def run_user_bot_async():
         try:
-            # Создаем новый event loop для этого потока
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+            import subprocess
+            import sys
             
-            from get_users import main as user_bot_main
-            user_bot_main()
+            # Запускаем пользовательский бот как отдельный процесс
+            process = subprocess.Popen(
+                [sys.executable, "get_users.py"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            logger.info("✅ User Collection Bot запущен как отдельный процесс")
+            
+            # Ожидаем завершения процесса (он будет работать бесконечно)
+            await asyncio.create_task(asyncio.to_thread(process.wait))
         except Exception as e:
             logger.error(f"❌ Ошибка запуска User Bot: {e}")
 
-    user_bot_thread = threading.Thread(target=run_user_bot, daemon=True)
-    user_bot_thread.start()
+    user_bot_task = asyncio.create_task(run_user_bot_async())
+    tasks.append(user_bot_task)
     
     # Небольшая задержка для корректного запуска
     await asyncio.sleep(2)
