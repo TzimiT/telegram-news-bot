@@ -103,14 +103,14 @@ def save_subscriber(user: Update.effective_user):
             # Проверяем что статус действительно обновился
             updated_user = db.get_user_info(user.id)
             logger.info(f"Проверка после обновления: is_active = {updated_user.get('is_active') if updated_user else 'None'}")
-            return True
-        return False
+            return "new_subscriber"  # Новый или повторно подписанный
+        return "error"
     else:
         # Пользователь уже активен - просто обновляем информацию
         db.update_user_interaction(user.id)
         # Обновляем информацию пользователя на случай изменений
         db.add_user(user.id, user.username, user.first_name, user.last_name, user_data)
-        return False
+        return "already_subscribed"  # Уже подписан
 
 def remove_subscriber(user_id):
     """Удалить подписчика из базы данных"""
@@ -119,19 +119,25 @@ def remove_subscriber(user_id):
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    was_added = save_subscriber(user)
+    result = save_subscriber(user)
 
     next_news = get_next_news_time()
     channels_list = get_channels_list()
 
-    if was_added:
+    if result == "new_subscriber":
         await update.message.reply_text(
             "🤖 Привет! Ты добавлен в рассылку агрегации новостей про AI.\n\n"
             f"Следующая рассылка: {next_news['formatted']}\n"
             f"Каналы для агрегации:\n{channels_list}"
         )
+    elif result == "already_subscribed":
+        await update.message.reply_text(
+            "✅ Ты уже в списке рассылки агрегации новостей про AI.\n\n"
+            f"Следующая рассылка: {next_news['formatted']}\n"
+            f"Каналы для агрегации:\n{channels_list}"
+        )
     else:
-        await update.message.reply_text("✅ Ты уже в списке рассылки агрегации новостей про AI.")
+        await update.message.reply_text("❌ Произошла ошибка при подписке. Попробуй ещё раз.")
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -149,19 +155,24 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    was_added = save_subscriber(user)
+    result = save_subscriber(user)
 
     next_news = get_next_news_time()
     channels_list = get_channels_list()
 
-    if was_added:
+    if result == "new_subscriber":
         await update.message.reply_text(
             "🤖 Спасибо за сообщение! Ты добавлен в рассылку агрегации новостей про AI.\n\n"
             f"Следующая рассылка: {next_news['formatted']}\n"
             f"Каналы для агрегации:\n{channels_list}"
         )
+    elif result == "already_subscribed":
+        await update.message.reply_text(
+            "✅ Ты уже подписан на рассылку.\n\n"
+            f"Следующая рассылка: {next_news['formatted']}"
+        )
     else:
-        await update.message.reply_text("Ты уже подписан на рассылку.")
+        await update.message.reply_text("❌ Произошла ошибка при подписке. Попробуй ещё раз.")
 
 async def stop_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
