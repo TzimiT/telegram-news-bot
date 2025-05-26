@@ -77,7 +77,7 @@ def summarize_news(news_list):
     text = "\n\n".join(news_list)
     client_ai = openai.OpenAI(api_key=openai_api_key)
     response = client_ai.chat.completions.create(
-        model="gpt-4.1-mini",
+        model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": "Сделай краткую сводку новостей за сутки по этим выдержкам, обязательно указывай источники. Если несколько новостей про одно и то же - кластеризуй в один пункт. Подробнее освещай всё про AI."},
             {"role": "user", "content": text}
@@ -221,6 +221,7 @@ async def run_continuous():
             break
         except Exception as e:
             logger.error(f"❌ Ошибка в основном цикле: {e}")
+            logger.exception("Полная трассировка ошибки:")
             await asyncio.sleep(300)  # ждем 5 минут при ошибке
 
 if __name__ == "__main__":
