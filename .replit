@@ -96,6 +96,15 @@ mode = "sequential"
 task = "shell.exec"
 args = "python main_service.py"
 
+[[workflows.workflow]]
+name = "View Recommendations"
+author = 43151943
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python show_recommendations.py"
+
 [deployment]
 build = ["sh", "-c", "python news_bot_part.py"]
 deploymentTarget = "scheduled"
