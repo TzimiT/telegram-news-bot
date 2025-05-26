@@ -7,33 +7,6 @@ channel = "stable-24_05"
 runButton = "Main Service 24/7"
 
 [[workflows.workflow]]
-name = "Start Bot"
-author = 43151943
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "python news_bot_part.py"
-
-[[workflows.workflow]]
-name = "News Aggregator"
-author = 43151943
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "python news_bot_part.py"
-
-[[workflows.workflow]]
-name = "User Collection Bot"
-author = 43151943
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "python get_users.py"
-
-[[workflows.workflow]]
 name = "Setup Session"
 author = 43151943
 mode = "sequential"
@@ -41,33 +14,6 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python session_manager.py"
-
-[[workflows.workflow]]
-name = "User Bot"
-author = 43151943
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "python get_users.py"
-
-[[workflows.workflow]]
-name = "User Bot (24/7)"
-author = 43151943
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "python get_users.py"
-
-[[workflows.workflow]]
-name = "News Service (24/7)"
-author = 43151943
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "python news_bot_part.py"
 
 [[workflows.workflow]]
 name = "User Bot Active"
