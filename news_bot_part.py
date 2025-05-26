@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 import json
 import os
 import logging
-import schedule
+
 from get_channels import get_channels_fullinfo_from_folder, load_channels_from_json
 from database import db
 
@@ -189,18 +189,33 @@ async def main():
 
 async def run_continuous():
     """Непрерывная работа с расписанием"""
-    import time
-    
-    # Планируем рассылку на 9:00 UTC каждый день
-    schedule.every().day.at("09:00").do(lambda: asyncio.create_task(main()))
     
     logger.info("🔄 Служба агрегации новостей запущена")
     logger.info("📅 Рассылка запланирована на 09:00 UTC каждый день")
     
     while True:
         try:
-            schedule.run_pending()
-            await asyncio.sleep(60)  # проверяем каждую минуту
+            # Получаем текущее время UTC
+            now = datetime.now(timezone.utc)
+            target_time = now.replace(hour=9, minute=0, second=0, microsecond=0)
+            
+            # Если время уже прошло сегодня, планируем на завтра
+            if now >= target_time:
+                target_time += timedelta(days=1)
+            
+            # Вычисляем время до следующего запуска
+            sleep_seconds = (target_time - now).total_seconds()
+            
+            logger.info(f"⏰ Следующая рассылка: {target_time.strftime('%Y-%m-%d %H:%M:%S UTC')}")
+            logger.info(f"⏱️ Ожидание: {sleep_seconds/3600:.1f} часов")
+            
+            # Спим до времени рассылки
+            await asyncio.sleep(sleep_seconds)
+            
+            # Выполняем рассылку
+            logger.info("🚀 Запуск рассылки новостей...")
+            await main()
+            
         except KeyboardInterrupt:
             logger.info("⏹️ Служба остановлена пользователем")
             break
