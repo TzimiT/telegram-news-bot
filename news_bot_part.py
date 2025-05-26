@@ -107,9 +107,7 @@ async def get_news(client, channels):
     return all_news
 
 async def send_news(summary):
-    # Мигрируем старые данные в базу данных, если необходимо
-    db.migrate_from_json()
-
+    # Получаем только активных пользователей
     subscribers = db.get_active_users()
     if not subscribers:
         logger.warning("[WARN] Нет активных подписчиков для рассылки.")
@@ -119,7 +117,7 @@ async def send_news(summary):
     successful_sends = 0
     failed_subscribers = []
 
-    logger.info(f"[INFO] Начинаю рассылку для {len(subscribers)} подписчиков")
+    logger.info(f"[INFO] Начинаю рассылку для {len(subscribers)} активных подписчиков")
 
     for user_id in subscribers:
         try:
@@ -129,22 +127,23 @@ async def send_news(summary):
             db.update_user_interaction(user_id)
             successful_sends += 1
         except Exception as e:
-            logger.error(f"[FAILED] Не удалось отправить сообщение пользователю {user_id}: {e}")
+            error_msg = str(e)
+            logger.error(f"[FAILED] Не удалось отправить сообщение пользователю {user_id}: {error_msg}")
             failed_subscribers.append(user_id)
-            # Деактивируем пользователя в случае ошибки
-            db.remove_user(user_id)
+            
+            # Деактивируем пользователя только при определенных ошибках
+            if "Chat not found" in error_msg or "Forbidden: bot was blocked" in error_msg:
+                db.remove_user(user_id)
+                logger.info(f"[INFO] Пользователь {user_id} деактивирован из-за недоступности чата")
 
     logger.info(f"[INFO] Рассылка завершена: успешно={successful_sends}, неудачно={len(failed_subscribers)}")
 
     if failed_subscribers:
-        logger.warning(f"[INFO] Деактивированы неактивные подписчики: {failed_subscribers}")
+        logger.warning(f"[INFO] Проблемы с отправкой {len(failed_subscribers)} пользователям")
 
 SESSION_FILE = 'sessions/news_session'
 
 async def main():
-    # Инициализируем базу данных и мигрируем старые данные
-    db.migrate_from_json()
-
     # Проверяем наличие файла сессии
     if not os.path.exists(f"{SESSION_FILE}.session"):
         print(f"❌ Файл сессии {SESSION_FILE}.session не найден!")
