@@ -159,7 +159,15 @@ class PostgresDatabase:
     
     def add_user(self, user_id: int, username: str = None, first_name: str = None, last_name: str = None, user_data: dict = None) -> bool:
         """Добавить пользователя в базу с расширенной информацией"""
-        conn = self._get_connection()
+        print(f"[DEBUG] add_user: начало для пользователя {user_id}")
+        
+        try:
+            conn = self._get_connection()
+            print(f"[DEBUG] add_user: подключение к БД успешно")
+        except Exception as e:
+            print(f"[ERROR] add_user: ошибка подключения к БД: {e}")
+            return False
+            
         cursor = conn.cursor()
         
         try:
@@ -235,9 +243,12 @@ class PostgresDatabase:
             ''', (user_id, datetime.now()))
             
             conn.commit()
+            print(f"[DEBUG] add_user: пользователь {user_id} успешно добавлен/обновлен")
             return True
         except Exception as e:
             print(f"❌ Ошибка добавления пользователя {user_id}: {e}")
+            print(f"[DEBUG] Тип ошибки: {type(e).__name__}")
+            print(f"[DEBUG] Детали ошибки: {str(e)}")
             conn.rollback()
             return False
         finally:

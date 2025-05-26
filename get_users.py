@@ -62,6 +62,14 @@ def get_channels_list():
 
 def save_subscriber(user: Update.effective_user):
     """Сохранить подписчика в базу данных с полной информацией"""
+    # Проверяем подключение к базе данных
+    try:
+        test_stats = db.get_user_stats()
+        logger.info(f"База данных доступна: {test_stats['active_users']} активных пользователей")
+    except Exception as e:
+        logger.error(f"❌ Ошибка подключения к базе данных: {e}")
+        return "error"
+    
     # Собираем максимально полную информацию о пользователе
     user_data = {
         'language_code': getattr(user, 'language_code', None),
@@ -89,6 +97,7 @@ def save_subscriber(user: Update.effective_user):
     
     # Если пользователь новый или был отписан - подписываем
     if not existing_user or not existing_user.get('is_active', False):
+        logger.info(f"Попытка добавить пользователя {user.id} в базу данных...")
         success = db.add_user(
             user.id,
             user.username,
@@ -96,6 +105,8 @@ def save_subscriber(user: Update.effective_user):
             user.last_name,
             user_data
         )
+        logger.info(f"Результат db.add_user для {user.id}: {success}")
+        
         if success:
             action = "повторно подписан" if existing_user else "добавлен новый подписчик"
             logger.info(f"{action}: {user.id} (@{user.username}) с полной информацией")
@@ -104,7 +115,9 @@ def save_subscriber(user: Update.effective_user):
             updated_user = db.get_user_info(user.id)
             logger.info(f"Проверка после обновления: is_active = {updated_user.get('is_active') if updated_user else 'None'}")
             return "new_subscriber"  # Новый или повторно подписанный
-        return "error"
+        else:
+            logger.error(f"❌ Ошибка добавления пользователя {user.id} в базу данных")
+            return "error"
     else:
         # Пользователь уже активен - просто обновляем информацию
         db.update_user_interaction(user.id)
