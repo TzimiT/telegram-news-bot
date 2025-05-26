@@ -4,7 +4,7 @@ modules = ["python-3.12"]
 channel = "stable-24_05"
 
 [workflows]
-runButton = "News Aggregator"
+runButton = "News Service (24/7)"
 
 [[workflows.workflow]]
 name = "Start Bot"
@@ -59,6 +59,15 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python get_users.py"
+
+[[workflows.workflow]]
+name = "News Service (24/7)"
+author = 43151943
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python news_bot_part.py"
 
 [deployment]
 build = ["sh", "-c", "python news_bot_part.py"]

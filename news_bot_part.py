@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 import json
 import os
 import logging
+import schedule
 from get_channels import get_channels_fullinfo_from_folder, load_channels_from_json
 from database import db
 
@@ -186,5 +187,34 @@ async def main():
         summary = summarize_news(news)
         await send_news(summary)
 
+async def run_continuous():
+    """Непрерывная работа с расписанием"""
+    import schedule
+    import time
+    
+    # Планируем рассылку на 9:00 UTC каждый день
+    schedule.every().day.at("09:00").do(lambda: asyncio.create_task(main()))
+    
+    logger.info("🔄 Служба агрегации новостей запущена")
+    logger.info("📅 Рассылка запланирована на 09:00 UTC каждый день")
+    
+    while True:
+        try:
+            schedule.run_pending()
+            await asyncio.sleep(60)  # проверяем каждую минуту
+        except KeyboardInterrupt:
+            logger.info("⏹️ Служба остановлена пользователем")
+            break
+        except Exception as e:
+            logger.error(f"❌ Ошибка в основном цикле: {e}")
+            await asyncio.sleep(300)  # ждем 5 минут при ошибке
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    import sys
+    
+    if len(sys.argv) > 1 and sys.argv[1] == "--once":
+        # Запуск рассылки один раз (для тестирования)
+        asyncio.run(main())
+    else:
+        # Постоянная работа с расписанием
+        asyncio.run(run_continuous())
