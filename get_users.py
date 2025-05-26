@@ -86,10 +86,10 @@ async def recommend_channel_start(update: Update, context: ContextTypes.DEFAULT_
 async def recommend_channel_receive(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     text = update.message.text.strip()
-    
+
     # Сохраняем в базу данных
     db.add_channel_recommendation(user.id, text)
-    
+
     # Также сохраняем в текстовый файл для совместимости
     rec_info = (
         f"date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | "
@@ -99,20 +99,7 @@ async def recommend_channel_receive(update: Update, context: ContextTypes.DEFAUL
     )
     with open("channel_recommendations.txt", "a", encoding="utf-8") as f:
         f.write(rec_info)
-    
-    await update.message.reply_text("Спасибо! Ваша рекомендация отправлена администратору.")
-    return ConversationHandler.END
 
-async def recommend_channel_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Рекомендация отменена.")
-    return ConversationHandler.END:%S')} | "
-        f"user_id: {user.id} | username: @{user.username or '-'} | "
-        f"name: {user.first_name or '-'} {user.last_name or '-'} | "
-        f"recommend: {text}\n"
-    )
-    with open("channel_recommendations.txt", "a", encoding="utf-8") as f:
-        f.write(rec_info)
-    
     await update.message.reply_text("Спасибо! Ваша рекомендация отправлена администратору.")
     return ConversationHandler.END
 
@@ -140,7 +127,7 @@ async def channels_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     user_info = db.get_user_info(user.id)
-    
+
     if user_info and user_info['is_active']:
         stats = db.get_user_stats()
         await update.message.reply_text(
@@ -158,16 +145,16 @@ async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # --- /admin_stats: статистика для админов ---
 async def admin_stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    
+
     # Простая проверка на админа (можете добавить список админов в config)
     admin_ids = [94598500]  # Замените на ваши ID
-    
+
     if user.id not in admin_ids:
         await update.message.reply_text("❌ У вас нет прав для просмотра статистики.")
         return
-    
+
     stats = db.get_user_stats()
-    
+
     message = f"""
 📊 **Статистика пользователей базы данных:**
 
@@ -176,12 +163,12 @@ async def admin_stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 🕐 **Последние активные пользователи:**
 """
-    
+
     for user_data in stats['recent_users']:
         username, first_name, last_name, last_interaction = user_data
         name = f"{first_name} {last_name}".strip()
         message += f"• @{username} ({name}) - {last_interaction}\n"
-    
+
     await update.message.reply_text(message)
 
 def main():
@@ -196,7 +183,7 @@ def main():
     app.add_handler(CommandHandler("status", status_command))
     app.add_handler(CommandHandler("channels", channels_command))
     app.add_handler(CommandHandler("admin_stats", admin_stats_command))
-    
+
     # Conversation handler для рекомендации каналов
     recommend_conv_handler = ConversationHandler(
         entry_points=[CommandHandler("recommend_channel", recommend_channel_start)],
@@ -211,35 +198,6 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
 
     print("🤖 Бот запущен...")
-    app.run_polling()
-
-if __name__ == "__main__":
-    main()andler("start", start))
-    app.add_handler(CommandHandler("help", help_command))
-    app.add_handler(CommandHandler("stop", stop_command))
-    app.add_handler(CommandHandler("status", status_command))
-    app.add_handler(CommandHandler("channels", channels_command))
-
-    # Conversation handler для рекомендации каналов
-    recommend_conv_handler = ConversationHandler(
-        entry_points=[CommandHandler("recommend_channel", recommend_channel_start)],
-        states={
-            RECOMMEND_WAIT_INPUT: [MessageHandler(filters.TEXT & ~filters.COMMAND, recommend_channel_receive)]
-        },
-        fallbacks=[CommandHandler("cancel", recommend_channel_cancel)]
-    )
-    app.add_handler(recommend_conv_handler)
-
-    # Команда для администраторов
-    app.add_handler(CommandHandler("admin_stats", admin_stats_command))
-
-    # Обработчик всех остальных сообщений
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
-
-    print("🤖 Бот запущен и ожидает сообщения...")
-    print("Нажмите Ctrl+C для остановки")
-    
-    # Запускаем polling для непрерывной работы
     app.run_polling()
 
 if __name__ == "__main__":
