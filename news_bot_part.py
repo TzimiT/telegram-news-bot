@@ -1,6 +1,3 @@
-The code is modified to include device information when creating the TelegramClient to prevent session conflicts.
-```
-```replit_final_file
 from telethon import TelegramClient
 from telegram import Bot
 import openai
