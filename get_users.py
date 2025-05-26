@@ -172,37 +172,7 @@ async def admin_stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     await update.message.reply_text(message)
 
-# --- /recommendations: просмотр рекомендаций каналов ---
-async def recommendations_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
 
-    # Простая проверка на админа
-    admin_ids = [94598500]  # Замените на ваши ID
-
-    if user.id not in admin_ids:
-        await update.message.reply_text("❌ У вас нет прав для просмотра рекомендаций.")
-        return
-
-    recommendations = db.get_channel_recommendations()
-
-    if not recommendations:
-        await update.message.reply_text("📭 Рекомендаций каналов пока нет.")
-        return
-
-    message = "📢 **Рекомендации каналов от пользователей:**\n\n"
-    
-    for i, rec in enumerate(recommendations[:10], 1):  # Показываем последние 10
-        user_info = db.get_user_info(rec['user_id'])
-        username = user_info['username'] if user_info else 'неизвестно'
-        
-        message += f"**{i}.** От @{username}\n"
-        message += f"📅 {rec['created_at']}\n"
-        message += f"💬 {rec['recommendation']}\n\n"
-
-    if len(recommendations) > 10:
-        message += f"... и ещё {len(recommendations) - 10} рекомендаций"
-
-    await update.message.reply_text(message)
 
 def main():
     import config  # импортирует telegram_bot_token из твоего конфига
@@ -216,7 +186,6 @@ def main():
     app.add_handler(CommandHandler("status", status_command))
     app.add_handler(CommandHandler("channels", channels_command))
     app.add_handler(CommandHandler("admin_stats", admin_stats_command))
-    app.add_handler(CommandHandler("recommendations", recommendations_command))
 
     # Conversation handler для рекомендации каналов
     recommend_conv_handler = ConversationHandler(
