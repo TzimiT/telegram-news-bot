@@ -161,6 +161,14 @@ async def main():
     # Проверяем и мигрируем старых подписчиков перед началом работы
     check_and_migrate_old_subscribers()
     
+    # Проверяем наличие файла сессии
+    if not os.path.exists(f"{SESSION_FILE}.session"):
+        print(f"❌ Файл сессии {SESSION_FILE}.session не найден!")
+        print("Запустите workflow 'Setup Session' для создания сессии.")
+        return
+    else:
+        print(f"✅ Файл сессии {SESSION_FILE}.session найден")
+    
     async with TelegramClient(SESSION_FILE, api_id, api_hash) as client:
         # Шаг 1: Получить и сохранить полную инфу о каналах из папки
         await get_channels_fullinfo_from_folder(client, FOLDER_NAME)
