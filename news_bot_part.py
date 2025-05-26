@@ -21,11 +21,36 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+SUBSCRIBERS_FILE = 'subscribers.json'
 
+def load_subscribers():
+    """Загрузить список подписчиков из файла"""
+    try:
+        if os.path.exists(SUBSCRIBERS_FILE):
+            with open(SUBSCRIBERS_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                return data.get('subscribers', [])
+        else:
+            # Миграция из старого файла, если новый не существует
+            return migrate_old_subscribers()
     except Exception as e:
         logger.error(f"[ERROR] Ошибка чтения {SUBSCRIBERS_FILE}: {e}")
         return []
 
+def migrate_old_subscribers():
+    OLD_SUBSCRIBERS_FILE = 'subscribers_id.txt'
+    new_subscribers = []
+    if os.path.exists(OLD_SUBSCRIBERS_FILE):
+        try:
+            with open(OLD_SUBSCRIBERS_FILE, 'r', encoding='utf-8') as f:
+                old_ids = [line.strip() for line in f.readlines()]
+
+                for user_id in old_ids:
+                    try:
+                        user_id = int(user_id)
+                        new_subscribers.append({
+                            "user_id": user_id,
+                            "subscribed_at": datetime.now(timezone.utc).strftime(
 time("%Y-%m-%d %H:%M:%S"),
                             "migrated": True
                         })
