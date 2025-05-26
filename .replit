@@ -4,7 +4,7 @@ modules = ["python-3.12", "postgresql-16"]
 channel = "stable-24_05"
 
 [workflows]
-runButton = "News Aggregator"
+runButton = "Main Service 24/7"
 
 [[workflows.workflow]]
 name = "Start Bot"
@@ -86,6 +86,15 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python news_bot_part.py --once"
+
+[[workflows.workflow]]
+name = "Main Service 24/7"
+author = 43151943
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python main_service.py"
 
 [deployment]
 build = ["sh", "-c", "python news_bot_part.py"]
