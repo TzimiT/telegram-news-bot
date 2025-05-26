@@ -85,7 +85,9 @@ def save_subscriber(user: Update.effective_user):
                f"verified={user_data['is_verified']}")
     
     existing_user = db.get_user_info(user.id)
-    if not existing_user or not existing_user['is_active']:
+    
+    # Если пользователь новый или был отписан - подписываем
+    if not existing_user or not existing_user.get('is_active', False):
         success = db.add_user(
             user.id,
             user.username,
@@ -94,14 +96,16 @@ def save_subscriber(user: Update.effective_user):
             user_data
         )
         if success:
-            logger.info(f"Добавлен новый подписчик: {user.id} (@{user.username}) с полной информацией")
+            action = "повторно подписан" if existing_user else "добавлен новый подписчик"
+            logger.info(f"{action}: {user.id} (@{user.username}) с полной информацией")
             return True
+        return False
     else:
-        # Обновляем время взаимодействия и информацию о пользователе
+        # Пользователь уже активен - просто обновляем информацию
         db.update_user_interaction(user.id)
-        # Также обновляем информацию пользователя на случай изменений
+        # Обновляем информацию пользователя на случай изменений
         db.add_user(user.id, user.username, user.first_name, user.last_name, user_data)
-    return False
+        return False
 
 def remove_subscriber(user_id):
     """Удалить подписчика из базы данных"""

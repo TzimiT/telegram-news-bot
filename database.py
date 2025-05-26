@@ -217,7 +217,7 @@ class PostgresDatabase:
                     is_scam = EXCLUDED.is_scam,
                     is_fake = EXCLUDED.is_fake,
                     is_active = true,
-                    last_interaction = EXCLUDED.last_interaction,
+                    last_interaction = CURRENT_TIMESTAMP,
                     user_data = EXCLUDED.user_data
             ''', (
                 user_id, username or "-", first_name or "-", last_name or "-", full_name,
