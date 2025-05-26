@@ -208,34 +208,18 @@ class PostgresDatabase:
             cursor.execute('''
                 INSERT INTO users (
                     user_id, username, first_name, last_name, 
-                    language_code, is_bot, is_premium, added_via_link,
-                    can_join_groups, can_read_all_group_messages, supports_inline_queries,
-                    is_verified, is_restricted, is_scam, is_fake,
                     added_at, is_active, last_interaction, user_data
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (user_id) DO UPDATE SET
                     username = EXCLUDED.username,
                     first_name = EXCLUDED.first_name,
                     last_name = EXCLUDED.last_name,
-                    language_code = EXCLUDED.language_code,
-                    is_bot = EXCLUDED.is_bot,
-                    is_premium = EXCLUDED.is_premium,
-                    can_join_groups = EXCLUDED.can_join_groups,
-                    can_read_all_group_messages = EXCLUDED.can_read_all_group_messages,
-                    supports_inline_queries = EXCLUDED.supports_inline_queries,
-                    is_verified = EXCLUDED.is_verified,
-                    is_restricted = EXCLUDED.is_restricted,
-                    is_scam = EXCLUDED.is_scam,
-                    is_fake = EXCLUDED.is_fake,
                     is_active = TRUE,
                     last_interaction = CURRENT_TIMESTAMP,
                     user_data = EXCLUDED.user_data
             ''', (
                 user_id, username or "-", first_name or "-", last_name or "-",
-                language_code, is_bot, is_premium, added_via_link,
-                can_join_groups, can_read_all_group_messages, supports_inline_queries,
-                is_verified, is_restricted, is_scam, is_fake,
                 datetime.now(), True, datetime.now(), json.dumps(user_data) if user_data else None
             ))
             
@@ -298,9 +282,6 @@ class PostgresDatabase:
         try:
             cursor.execute('''
                 SELECT user_id, username, first_name, last_name,
-                       language_code, is_bot, is_premium, added_via_link,
-                       can_join_groups, can_read_all_group_messages, supports_inline_queries,
-                       is_verified, is_restricted, is_scam, is_fake,
                        added_at, is_active, last_interaction, user_data
                 FROM users WHERE user_id = %s
             ''', (user_id,))
