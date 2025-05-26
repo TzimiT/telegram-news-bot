@@ -28,11 +28,13 @@ async def initialize_session():
             SESSION_FILE, 
             api_id, 
             api_hash,
-            device_model="News Aggregator Bot",
-            system_version="1.0",
-            app_version="1.0",
+            device_model="Replit News Bot v2.1",
+            system_version="Linux Replit",
+            app_version="2.1.0",
             lang_code="ru",
-            system_lang_code="ru"
+            system_lang_code="ru",
+            use_ipv6=False,
+            proxy=None
         ) as client:
             print("🔗 Подключение к Telegram...")
             await client.connect()
