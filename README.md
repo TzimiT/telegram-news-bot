@@ -49,7 +49,6 @@ openai_api_key = "sk-proj-YOUR_KEY"     # OpenAI API ключ
 telegram_bot_token = "YOUR_BOT_TOKEN"   # Токен Telegram бота
 FOLDER_NAME = "GPT"                     # Папка с каналами в Telegram
 TARGET_CHAT_ID = "YOUR_CHAT_ID"         # ID канала для рассылки
-SUBSCRIBERS_FILE = "subscribers.json"   # Файл подписчиков
 ```
 
 ### 2. Установка зависимостей
@@ -159,7 +158,6 @@ openai_api_key = "sk-proj-YOUR_KEY"     # OpenAI API ключ
 telegram_bot_token = "YOUR_BOT_TOKEN"   # Токен Telegram бота
 FOLDER_NAME = "GPT"                     # Папка с каналами в Telegram
 TARGET_CHAT_ID = "YOUR_CHAT_ID"         # ID канала для рассылки
-SUBSCRIBERS_FILE = "subscribers.json"   # Файл подписчиков
 ```
 
 ### 2. Установка зависимостей
