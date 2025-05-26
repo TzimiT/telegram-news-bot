@@ -105,6 +105,33 @@ mode = "sequential"
 task = "shell.exec"
 args = "python show_recommendations.py"
 
+[[workflows.workflow]]
+name = "Development Mode"
+author = 43151943
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python get_users.py --dev"
+
+[[workflows.workflow]]
+name = "Test News Send"
+author = 43151943
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python news_bot_part.py --test"
+
+[[workflows.workflow]]
+name = "Dev Database Check"
+author = 43151943
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python -c \"from database import db; print('DB Status:', db.get_user_stats())\""
+
 [deployment]
 build = ["sh", "-c", "python news_bot_part.py"]
 deploymentTarget = "scheduled"
