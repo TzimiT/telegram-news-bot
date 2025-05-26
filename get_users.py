@@ -99,6 +99,10 @@ def save_subscriber(user: Update.effective_user):
         if success:
             action = "повторно подписан" if existing_user else "добавлен новый подписчик"
             logger.info(f"{action}: {user.id} (@{user.username}) с полной информацией")
+            
+            # Проверяем что статус действительно обновился
+            updated_user = db.get_user_info(user.id)
+            logger.info(f"Проверка после обновления: is_active = {updated_user.get('is_active') if updated_user else 'None'}")
             return True
         return False
     else:

@@ -46,15 +46,8 @@ async def main():
     logger.info("👥 Запуск User Collection Bot...")
     def run_user_bot():
         try:
-            # Импортируем здесь чтобы избежать конфликтов
-            import subprocess
-            import sys
-            
-            # Запускаем пользовательский бот как отдельный процесс
-            subprocess.Popen([sys.executable, "get_users.py"], 
-                           stdout=subprocess.PIPE, 
-                           stderr=subprocess.PIPE)
-            logger.info("✅ User Collection Bot запущен как отдельный процесс")
+            from get_users import main as user_bot_main
+            user_bot_main()
         except Exception as e:
             logger.error(f"❌ Ошибка запуска User Bot: {e}")
 
