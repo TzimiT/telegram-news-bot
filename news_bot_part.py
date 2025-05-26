@@ -189,7 +189,6 @@ async def main():
 
 async def run_continuous():
     """Непрерывная работа с расписанием"""
-    import schedule
     import time
     
     # Планируем рассылку на 9:00 UTC каждый день
