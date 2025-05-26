@@ -63,7 +63,17 @@ async def get_channels_fullinfo_from_folder(client, folder_name, output_file=Non
         target_filter = None
 
         for filter_obj in filters.filters:
-            if hasattr(filter_obj, 'title') and filter_obj.title == folder_name:
+            # Проверяем разные типы title (строка или TextWithEntities)
+            filter_title = None
+            if hasattr(filter_obj, 'title'):
+                if hasattr(filter_obj.title, 'text'):
+                    # TextWithEntities объект
+                    filter_title = filter_obj.title.text
+                else:
+                    # Обычная строка
+                    filter_title = filter_obj.title
+            
+            if filter_title == folder_name:
                 target_filter = filter_obj
                 break
 
