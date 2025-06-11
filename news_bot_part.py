@@ -9,6 +9,7 @@ import os
 from get_channels import get_channels_fullinfo_from_folder, load_channels_from_json
 
 SUBSCRIBERS_FILE = "subscribers.json"
+TELEGRAM_MAX_MESSAGE_LENGTH = 4096
 
 def load_subscribers():
     if not os.path.exists(SUBSCRIBERS_FILE):
@@ -62,6 +63,35 @@ async def get_news(client, channels):
                 print(f"[DEBUG] {username} | id={message.id} | дата={msg_date_norm} - добавлено")
     return all_news
 
+def split_message(text, max_length=TELEGRAM_MAX_MESSAGE_LENGTH):
+    """
+    Разбивает текст на части не длиннее max_length символов.
+    Разделяет по абзацам, чтобы не резать посреди предложения.
+    Если абзац длиннее лимита — делит тупо на куски.
+    """
+    paragraphs = text.split('\n\n')
+    messages = []
+    current_message = ""
+    for para in paragraphs:
+        if len(current_message) + len(para) + 2 <= max_length:
+            if current_message:
+                current_message += "\n\n" + para
+            else:
+                current_message = para
+        else:
+            if current_message:
+                messages.append(current_message)
+            if len(para) <= max_length:
+                current_message = para
+            else:
+                # если параграф длиннее лимита, делим его тупо на куски
+                for i in range(0, len(para), max_length):
+                    messages.append(para[i:i+max_length])
+                current_message = ""
+    if current_message:
+        messages.append(current_message)
+    return messages
+
 async def send_news(summary):
     subscribers = load_subscribers()
     if not subscribers:
@@ -71,10 +101,21 @@ async def send_news(summary):
     bot = Bot(token=telegram_bot_token)
     active_subscribers = []
 
+    # Разбиваем summary на части не длиннее 4096 символов
+    message_chunks = split_message(summary)
+
     for user_id in subscribers:
         try:
-            result = await bot.send_message(chat_id=user_id, text=summary)
-            print(f"[LOG] Сообщение успешно отправлено пользователю {user_id}, message_id={result.message_id}")
+            for idx, chunk in enumerate(message_chunks):
+                # Можно добавить нумерацию частей если сообщений больше одного
+                if len(message_chunks) > 1:
+                    part_text = f"Часть {idx+1}/{len(message_chunks)}\n\n{chunk}"
+                else:
+                    part_text = chunk
+                result = await bot.send_message(chat_id=user_id, text=part_text)
+                print(f"[LOG] Сообщение успешно отправлено пользователю {user_id}, message_id={result.message_id}")
+                # Рекомендуется сделать небольшую паузу между отправками частей
+                await asyncio.sleep(0.1)
             active_subscribers.append(user_id)
         except Exception as e:
             print(f"[ERROR] Не удалось отправить сообщение пользователю {user_id}: {e}")
